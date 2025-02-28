@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "User_App",
-    "slug": "User_App",
+    "name": "Plantify",
+    "slug": "Plantify",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
