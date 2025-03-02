@@ -1,8 +1,5 @@
-import React from "react";
-import {
-  Image, StyleSheet,
-  Text, View
-} from "react-native";
+import React, { useState } from "react";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CustomButton from "../components/CustomButton";
 import CustomInput from "../components/CustomInput";
@@ -15,18 +12,52 @@ import {
   Philosopher_700Bold,
   Philosopher_700Bold_Italic,
 } from "@expo-google-fonts/philosopher";
+import { useSignupMutation } from "@/redux/api/authApi";
 
 const SignupScreen = () => {
   const navigation = useNavigation();
 
-  const handleSubmit = () => {
-    navigation.navigate("tabs");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const [signup, { isLoading }] = useSignupMutation();
+
+  const handleSubmit = async () => {
+    // Validate fields
+    if (!username || !email || !password || !confirmPassword) {
+      setErrorMsg("All fields are required.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMsg("Passwords do not match.");
+      return;
+    }
+
+    try {
+      // Call the signup endpoint with provided credentials
+      const userData = await signup({ username, email, password }).unwrap();
+      console.log("Signup successful:", userData);
+      // Clear input fields and error message
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setErrorMsg("");
+      // Navigate to login screen (or another screen if desired)
+      navigation.navigate("login");
+    } catch (error) {
+      console.error("Signup error:", error);
+      setErrorMsg(error.data?.message || "Signup failed. Please try again.");
+    }
   };
 
   const handleLogin = () => {
     navigation.navigate("login");
   };
-  
 
   let [fontsLoaded] = useFonts({
     Philosopher_400Regular,
@@ -34,6 +65,7 @@ const SignupScreen = () => {
     Philosopher_700Bold,
     Philosopher_700Bold_Italic,
   });
+
   return (
     <View style={styles.container}>
       <Image
@@ -46,11 +78,34 @@ const SignupScreen = () => {
         text={"Start Your Plantify Journey Today!"}
         style={styles.subtitle}
       />
-      <CustomInput label="Username" placeholder="Enter username" />
-      <CustomInput label="Email" placeholder="Enter email" />
-      <CustomPasswordInput />
-      <CustomPasswordInput label="Confirm Password" />
-      <CustomButton onPress={handleSubmit} style={styles.button} text="Sign Up"/>
+      <CustomInput
+        label="Username"
+        placeholder="Enter username"
+        value={username}
+        onChangeText={setUsername}
+      />
+      <CustomInput
+        label="Email"
+        placeholder="Enter email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <CustomPasswordInput
+        label="Password"
+        value={password}
+        onChangeText={setPassword}
+      />
+      <CustomPasswordInput
+        label="Confirm Password"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+      />
+      {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
+      <CustomButton
+        onPress={handleSubmit}
+        style={styles.button}
+        text={isLoading ? "Signing up..." : "Sign Up"}
+      />
       <Text style={styles.footertitle}>
         Already have an account on Plantify?{" "}
         <Text style={styles.clickText} onPress={handleLogin}>
@@ -100,7 +155,7 @@ const styles = StyleSheet.create({
   },
   footertitle: {
     fontSize: 16,
-    fontWeight:"600",
+    fontWeight: "600",
     color: "#333",
     marginTop: 10,
     alignSelf: "center",
@@ -110,5 +165,9 @@ const styles = StyleSheet.create({
     color: "#0D986A",
     textDecorationLine: "underline",
   },
+  errorText: {
+    color: "red",
+    marginTop: 10,
+    textAlign: "center",
+  },
 });
-

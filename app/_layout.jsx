@@ -1,3 +1,4 @@
+// RootLayout.jsx
 import React from "react";
 import {
   createStackNavigator,
@@ -6,39 +7,40 @@ import {
 import AuthLayout from "./auth/_layout";
 import TabLayout from "./(tabs)/_layout";
 import NotFoundScreen from "./+not-found";
-import { Provider } from "react-redux";
+import ProductDetails from "./screens/ProductDetails";
+import { Provider, useSelector } from "react-redux";
 import { store } from "../redux/store";
 import "../global.css";
 
 const Stack = createStackNavigator();
 
-const RootLayout = () => {
+const RootNavigator = () => {
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  console.log("Login Screen isAuthenticated :- ", isAuthenticated);
+
   return (
-    <Provider store={store}> 
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
+        gestureEnabled: true,
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
       }}
+      initialRouteName={isAuthenticated ? "tabs" : "auth"}
     >
-      <Stack.Screen
-        name="auth"
-        component={AuthLayout}
-        options={{
-          gestureEnabled: true,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      />
-      <Stack.Screen
-        name="tabs"
-        component={TabLayout}
-        options={{
-          gestureEnabled: true,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      />
+      <Stack.Screen name="auth" component={AuthLayout} />
+      <Stack.Screen name="tabs" component={TabLayout} />
+      <Stack.Screen name="ProductDetails" component={ProductDetails} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} />
-      </Stack.Navigator>
-      </Provider>
+    </Stack.Navigator>
+  );
+};
+
+const RootLayout = () => {
+  return (
+    <Provider store={store}>
+      <RootNavigator />
+    </Provider>
   );
 };
 

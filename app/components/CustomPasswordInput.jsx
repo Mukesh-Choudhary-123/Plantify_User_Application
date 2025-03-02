@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Ionicons } from '@expo/vector-icons';
 
-const CustomPasswordInput = ({ label = "Password", placeholder = "Enter password", ...props }) => {
+const CustomPasswordInput = ({ label = "Password", placeholder = "Enter password", onChangeText , value,...props }) => {
   const [secureText, setSecureText] = useState(true);
 
   return (
@@ -14,6 +14,8 @@ const CustomPasswordInput = ({ label = "Password", placeholder = "Enter password
           placeholder={placeholder}
           secureTextEntry={secureText}
           style={styles.input}
+          value={value}
+        onChangeText={onChangeText}
           {...props}
         />
         <TouchableOpacity onPress={() => setSecureText(!secureText)}>

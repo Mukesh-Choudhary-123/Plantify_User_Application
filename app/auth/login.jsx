@@ -1,8 +1,5 @@
-import React from "react";
-import {
-  Image, StyleSheet,
-  Text, View
-} from "react-native";
+import React, { useState } from "react";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CustomButton from "../components/CustomButton";
 import CustomInput from "../components/CustomInput";
@@ -15,12 +12,41 @@ import {
   Philosopher_700Bold,
   Philosopher_700Bold_Italic,
 } from "@expo-google-fonts/philosopher";
+import { useLoginMutation } from "@/redux/api/authApi";
+import { setCredentials } from "@/redux/slices/authSlice";
+import { useDispatch } from "react-redux";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
-  const handleSubmit = () => {
-    navigation.navigate("tabs");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Destructure the login function and mutation status from the hook
+  const [login, { isLoading }] = useLoginMutation();
+
+  const handleSubmit = async () => {
+    // Basic validation
+    if (!email || !password) {
+      setErrorMsg("Please fill in both fields.");
+      return;
+    }
+    try {
+      // Attempt login with credentials
+      const userData = await login({ email, password }).unwrap();
+      console.log("User:", userData);
+      // Clear the fields on success
+      setEmail("");
+      setPassword("");
+      setErrorMsg("");
+      dispatch(setCredentials({ user: userData.user, token: userData.token }));
+      navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
+    } catch (err) {
+      console.error("Login error:", err);
+      setErrorMsg("Login failed. Please check your credentials.");
+    }
   };
 
   const handleSignUp = () => {
@@ -33,6 +59,7 @@ const LoginScreen = () => {
     Philosopher_700Bold,
     Philosopher_700Bold_Italic,
   });
+
   return (
     <View style={styles.container}>
       <Image
@@ -45,14 +72,25 @@ const LoginScreen = () => {
         text={"Grow Green, Shop Smart – Welcome to Plantify!"}
         style={styles.subtitle}
       />
-      <CustomInput label="Email" placeholder="Enter email" />
-      <CustomPasswordInput />
-      <CustomButton onPress={handleSubmit} style={styles.button} text="Log in"/>
+      <CustomInput
+        label="Email"
+        placeholder="Enter email"
+        value={email}
+        onChangeText={setEmail}
+        // error={errorMsg}
+      />
+      <CustomPasswordInput value={password} onChangeText={setPassword} />
+      <CustomButton
+        onPress={handleSubmit}
+        style={styles.button}
+        text={isLoading ? "Logging in..." : "Log in"}
+      />
+      {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
       <Text style={styles.footertitle}>
         New to Plantify?{" "}
         <Text style={styles.clickText} onPress={handleSignUp}>
-          Sign-up{" "}
-        </Text>
+          Sign-up
+        </Text>{" "}
         now!
       </Text>
     </View>
@@ -97,7 +135,7 @@ const styles = StyleSheet.create({
   },
   footertitle: {
     fontSize: 16,
-    fontWeight:"600",
+    fontWeight: "600",
     color: "#333",
     marginTop: 10,
     alignSelf: "center",
@@ -106,5 +144,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#0D986A",
     textDecorationLine: "underline",
+  },
+  errorText: {
+    marginTop: 10,
+    color: "red",
+    textAlign: "center",
   },
 });

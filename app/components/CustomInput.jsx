@@ -2,11 +2,14 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const CustomInput = ({ label = "Label", placeholder = "Enter text...", ...props }) => {
+const CustomInput = ({ label = "Label",error, placeholder = "Enter text...", onChangeText ,value, ...props }) => {
   return (
     <View style={styles.inputContainer}>
+      <View style={{flexDirection:"row", justifyContent:"space-between",paddingHorizontal:5}}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput placeholder={placeholder} style={styles.input} {...props} />
+      <Text style={styles.errorText}>{ error}</Text>
+      </View>
+      <TextInput onChangeText={onChangeText} value={value} placeholder={placeholder} style={styles.input} {...props} />
     </View>
   );
 };
@@ -28,6 +31,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: "#374151",
     marginBottom: 6,
+  }, errorText: {
+    color: "red",
+    fontSize: 16,
+    fontWeight: "500",
   },
   input: {
     borderWidth: 1,
