@@ -8,6 +8,7 @@ import AuthLayout from "./auth/_layout";
 import TabLayout from "./(tabs)/_layout";
 import NotFoundScreen from "./+not-found";
 import ProductDetails from "./screens/ProductDetails";
+import PlaceOrder from './screens/PlaceOrder';
 import { Provider, useSelector } from "react-redux";
 import { store } from "../redux/store";
 import "../global.css";
@@ -31,6 +32,7 @@ const RootNavigator = () => {
       <Stack.Screen name="auth" component={AuthLayout} />
       <Stack.Screen name="tabs" component={TabLayout} />
       <Stack.Screen name="ProductDetails" component={ProductDetails} />
+      <Stack.Screen name="PlaceOrder" component={PlaceOrder} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} />
     </Stack.Navigator>
   );

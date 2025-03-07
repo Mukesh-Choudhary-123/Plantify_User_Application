@@ -44,6 +44,7 @@ const LoginScreen = () => {
       dispatch(setCredentials({ user: userData.user, token: userData.token }));
       navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
     } catch (err) {
+      navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
       console.error("Login error:", err);
       setErrorMsg("Login failed. Please check your credentials.");
     }
@@ -83,7 +84,7 @@ const LoginScreen = () => {
       <CustomButton
         onPress={handleSubmit}
         style={styles.button}
-        text={isLoading ? "Logging in..." : "Log in"}
+        text={isLoading ? "Logging in..." : "Log In"}
       />
       {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
       <Text style={styles.footertitle}>

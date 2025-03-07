@@ -11,6 +11,7 @@ import CustomHeader from "../components/CustomHeader";
 import { useFonts, Philosopher_700Bold } from "@expo-google-fonts/philosopher";
 import { FontAwesome } from "@expo/vector-icons";
 import CustomButton from "../components/CustomButton";
+import { useNavigation } from "@react-navigation/native";
 
 const colors = [
   "#9CE5CB",
@@ -26,6 +27,8 @@ const CartScreen = () => {
   let [fontsLoaded] = useFonts({
     Philosopher_700Bold,
   });
+
+  const navigation = useNavigation();
 
   // Product List (with state for quantity management)
   const [cartItems, setCartItems] = useState([
@@ -151,6 +154,11 @@ const CartScreen = () => {
   const deliveryFee = 50;
   const total = subtotal + deliveryFee;
 
+
+  const handlePlaceOrder = () => {
+    navigation.navigate("PlaceOrder");
+  }
+
   return (
     <View style={styles.container}>
       <CustomHeader />
@@ -218,7 +226,7 @@ const CartScreen = () => {
       />
 
       {/* Totals Section */}
-      <View style={styles.totalsCard}>
+      {/* <View style={styles.totalsCard}>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Subtotal:</Text>
           <Text style={styles.totalValue}>₹{subtotal}</Text>
@@ -231,11 +239,11 @@ const CartScreen = () => {
           <Text style={styles.grandTotal}>Total:</Text>
           <Text style={styles.grandTotal}>₹{total}</Text>
         </View>
-      </View>
+      </View> */}
 
       {/* Checkout Button */}
 
-      <CustomButton text="Place Order" />
+      <CustomButton text="Place Order" onPress={handlePlaceOrder}/>
 
       {/* <TouchableOpacity style={styles.checkoutButton}>
         <Text style={styles.checkoutText}>Place Order</Text>
