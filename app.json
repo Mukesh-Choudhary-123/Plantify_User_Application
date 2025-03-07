@@ -8,6 +8,7 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
+    "sdkVersion": "51.0.0",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mukesh63.Plantify"
