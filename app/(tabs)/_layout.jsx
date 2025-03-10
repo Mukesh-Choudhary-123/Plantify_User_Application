@@ -31,7 +31,7 @@ const TabLayout = () => {
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
-          tabBarShowLabel: true,
+          // tabBarShowLabel: false,
           tabBarActiveTintColor: "#0D986A",
           tabBarInactiveTintColor: "#808080",
           tabBarStyle: {
@@ -47,7 +47,7 @@ const TabLayout = () => {
           component={Home}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="home" size={size} color={color} />
+              <FontAwesome name="home" size={size} color={color}/>
             ),
           }}
         />

@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
+    // borderWidth: 1,
     borderColor: "#D1D5DB",
     borderRadius: 12,
     backgroundColor: "#F3F4F6",

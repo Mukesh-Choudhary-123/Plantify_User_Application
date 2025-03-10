@@ -225,29 +225,10 @@ const CartScreen = () => {
         )}
       />
 
-      {/* Totals Section */}
-      {/* <View style={styles.totalsCard}>
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Subtotal:</Text>
-          <Text style={styles.totalValue}>₹{subtotal}</Text>
-        </View>
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Delivery:</Text>
-          <Text style={styles.totalValue}>₹{deliveryFee}</Text>
-        </View>
-        <View style={[styles.totalRow, { marginTop: 8 }]}>
-          <Text style={styles.grandTotal}>Total:</Text>
-          <Text style={styles.grandTotal}>₹{total}</Text>
-        </View>
-      </View> */}
-
       {/* Checkout Button */}
 
-      <CustomButton text="Place Order" onPress={handlePlaceOrder}/>
+      <CustomButton text="Place Order" style={{marginTop:15}} onPress={handlePlaceOrder}/>
 
-      {/* <TouchableOpacity style={styles.checkoutButton}>
-        <Text style={styles.checkoutText}>Place Order</Text>
-      </TouchableOpacity> */}
     </View>
   );
 };
@@ -256,8 +237,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#ffffff",
-    paddingBottom: 20,
-   
   },
   vector: {
     position: "absolute",
@@ -273,8 +252,8 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   listContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: 15,
+    // paddingBottom: 20,
   },
   headingText: {
     fontSize: 28,

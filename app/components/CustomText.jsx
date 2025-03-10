@@ -16,7 +16,6 @@ const CustomText = ({ text, style, fontFamily, ...props }) => {
       style={[
         styles.text,
         style,
-        // { fontFamily: fontFamily ? "Philosopher_700Bold" : undefined },
       ]}
       {...props}
     >

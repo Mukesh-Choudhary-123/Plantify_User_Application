@@ -12,6 +12,11 @@ import PlaceOrder from './screens/PlaceOrder';
 import { Provider, useSelector } from "react-redux";
 import { store } from "../redux/store";
 import "../global.css";
+import { AppRegistry } from 'react-native';
+import { name as appName } from '../app.json';
+
+AppRegistry.registerComponent(appName, () => App);
+
 
 const Stack = createStackNavigator();
 

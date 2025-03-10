@@ -18,12 +18,17 @@ import {
   Philosopher_700Bold,
 } from "@expo-google-fonts/philosopher";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useGetProductsQuery } from "../../redux/api/productApi";
 
 const HomeScreen = () => {
   let [fontsLoaded] = useFonts({
     Philosopher_400Regular,
     Philosopher_700Bold,
   });
+
+  const{data,isLoading,isError}=useGetProductsQuery()
+  
+  console.log("Product:- ",data?.products)
 
   const options = ["Top Pick", "Indoor", "Outdoor", "Seed", "Fertilizer", "Pots", "Tools", "Decor"];
   const [search, setSearch] = useState("");

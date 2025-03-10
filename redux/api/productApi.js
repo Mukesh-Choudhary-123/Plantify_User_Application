@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const LOCAL_IP = "192.168.1.100";
+const LOCAL_IP = "192.168.43.74";
 
 export const productApi = createApi({
   reducerPath: "productApi",
