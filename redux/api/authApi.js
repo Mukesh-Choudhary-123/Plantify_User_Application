@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { IP } from "../../constant"; 
 
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://192.168.43.74:8000/api/v1/user/",
+    baseUrl: `http://${IP}:8080/api/v1/user/`,
   }),
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -30,5 +31,4 @@ export const authApi = createApi({
   }),
 });
 
-// Export hooks for usage in functional components
 export const { useLoginMutation, useSignupMutation ,useLogoutMutation } = authApi;

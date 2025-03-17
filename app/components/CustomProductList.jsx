@@ -6,12 +6,13 @@ import {
   FlatList,
   Pressable,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CustomText from "./CustomText";
 import { useFonts, Philosopher_700Bold } from "@expo-google-fonts/philosopher";
 import { useNavigation } from "@react-navigation/native";
-
+import { useGetProductsQuery } from "../../redux/api/productApi";
 const colors = [
   "#9CE5CB",
   "#FDC7BE",
@@ -22,7 +23,7 @@ const colors = [
   "#F5EDA8",
 ];
 
-const ProductCard = ({ id, title, subtitle, prices, image, bgColor }) => {
+const ProductCard = ({ id, title, subtitle, prices, image,description, bgColor }) => {
   const navigation = useNavigation();
   let [fontsLoaded] = useFonts({
     Philosopher_700Bold,
@@ -34,6 +35,30 @@ const ProductCard = ({ id, title, subtitle, prices, image, bgColor }) => {
       cardColor: bgColor,
     });
   };
+  function truncateDescription(text, wordsPerLine = 4, maxLines = 2) {
+    if (!text) return "";
+    const words = text.split(" ");
+    let result = "";
+  
+    for (let lineIndex = 0; lineIndex < maxLines; lineIndex++) {
+      const start = lineIndex * wordsPerLine;
+      const end = start + wordsPerLine;
+      const lineWords = words.slice(start, end);
+      if (lineWords.length === 0) break; // no more words
+  
+      let line = lineWords.join(" ");
+      // If it's the last allowed line and there are more words, add ellipsis.
+      if (lineIndex === maxLines - 1 && end < words.length) {
+        line += " ...";
+      }
+      result += line;
+      if (lineIndex < maxLines - 1 && end < words.length) {
+        result += "\n"; // add a newline if there is another line coming
+      }
+    }
+  
+    return result;
+  }
 
   return (
     <TouchableOpacity onPress={handlePress}>
@@ -56,11 +81,12 @@ const ProductCard = ({ id, title, subtitle, prices, image, bgColor }) => {
           </View>
           <CustomText text={title} style={styles.title} />
           <Text style={styles.des}>
-            Aloe vera is a succulent{"\n"}plant with thick, fleshy leaves.
+            {/* Aloe vera is a succulent{"\n"}plant with thick, fleshy leaves. */}
+            {truncateDescription(description)}
           </Text>
           <Text style={styles.prices}>₹{prices}/- Rs.</Text>
         </View>
-        <View>
+        <View style={{right:0}}>
           <Image source={{ uri: image }} style={styles.image} />
         </View>
       </View>
@@ -68,80 +94,62 @@ const ProductCard = ({ id, title, subtitle, prices, image, bgColor }) => {
   );
 };
 
-const ProductList = () => {
-  const products = [
-    {
-      id: 3729819873984234,
-      title: "Aleo Vera",
-      prices: 200,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810277/sfqzlryj35d3qirkrmd9.png",
-    },
-    {
-      id: 3729819873984235,
-      title: "Peace Lily",
-      prices: 300,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810275/vf6t8uxpsieqvmlk6vau.png",
-    },
-    {
-      id: 3729819873984236,
-      title: "Spider Plant",
-      prices: 220,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/zcwyruubsttbphlcfwhr.png",
-    },
-    {
-      id: 3729819873984237,
-      title: "Money Plant",
-      prices: 180,
-      subtitle: "Indoor Plant",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/y5ne7fz3zcucplxjjblu.png",
-    },
-    {
-      id: 3729819873984238,
-      title: "Jade Plant",
-      prices: 270,
-      subtitle: "Succulent",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810279/c1fuea1c20gw3p7z5jir.png",
-    },
-    // ... add other products as needed
-  ];
+// const ProductList = () => {
+ 
+//   const [page, setPage] = useState(1);
+//   const [products, setProducts] = useState([]);
+//   const [isFetching, setIsFetching] = useState(false);
+//   const [hasMore, setHasMore] = useState(true); // Track if more products exist
 
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <Text style={styles.headerTitle}>Popular Plants</Text>
-      <Text style={styles.headerSubtitle}>Bring nature into your space</Text>
-    </View>
-  );
+//   const { data, error, isLoading } = useGetProductsQuery({ page, limit: 5 });
 
-  return (
-    <FlatList
-      data={products}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={({ item, index }) => (
-        <ProductCard
-          id={item.id}
-          title={item.title}
-          subtitle={item.subtitle}
-          prices={item.prices}
-          image={item.image}
-          bgColor={colors[index % colors.length]}
-        />
-      )}
-      showsVerticalScrollIndicator={false}
-      scrollEnabled={false}
+//   useEffect(() => {
+//     if (data?.products) {
+//       setProducts((prevProducts) =>
+//         page === 1 ? data.products : [...prevProducts, ...data.products]
+//       );
 
-    />
-  );
-};
+//       if (page >= data.totalPages) {
+//         setHasMore(false); // No more pages to fetch
+//       }
+//     }
+//     setIsFetching(false);
+//   }, [data]);
 
-export default ProductList;
+//   const loadMoreProducts = () => {
+//     if (!isFetching && hasMore) {
+//       setIsFetching(true);
+//       setPage((prevPage) => prevPage + 1);
+//     }
+//   };
+
+//   return (
+//     <FlatList
+//       data={products}
+//       keyExtractor={(item) => item.id.toString()}
+//       renderItem={({ item, index }) => (
+//         <ProductCard
+//           id={item.id}
+//           title={item.title}
+//           subtitle={item.subtitle}
+//           prices={item.price}
+//           image={item.thumbnail}
+//           description={item.description}
+//           bgColor={colors[index % colors.length]}
+//         />
+//       )}
+//       onEndReached={loadMoreProducts} // Triggered when user scrolls near the end
+//       onEndReachedThreshold={0.5} // Adjust threshold for earlier fetching
+//       ListFooterComponent={() =>
+//         isFetching ? <ActivityIndicator size="large" color="#000" /> : hasMore ? null : <View>No more products</View>
+//       }
+//       showsVerticalScrollIndicator={false}
+//     />
+//   );
+
+// };
+
+export default ProductCard;
 
 const styles = StyleSheet.create({
   headerText: {
@@ -179,6 +187,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 3,
+    justifyContent:"space-between"
   },
   vector: {
     position: "absolute",

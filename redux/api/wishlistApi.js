@@ -1,24 +1,25 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { IP } from "../../constant"; 
 
 export const wishlistApi = createApi({
   reducerPath: "wishlistApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://193.168.0.195:8000/api/v1/",
+    baseUrl: `http://${IP}:8080/api/v1/wishlist`,
   }),
   endpoints: (builder) => ({
     getWishlist: builder.query({
-      query: () => "wishlist/",
+      query: (id) => `/${id}`,
     }),
     addToWishlist: builder.mutation({
-      query: (data) => ({
-        url: "wishlist/",
+      query: ({ id, productId }) => ({
+        url: `/${id}`,
         method: "POST",
-        body: data,
+        body: {productId},
       }),
     }),
     removeFromWishlist: builder.mutation({
       query: (data) => ({
-        url: "wishlist/",
+        url: "/",
         method: "DELETE",
         body: data,
       }),

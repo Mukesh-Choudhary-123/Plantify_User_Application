@@ -9,6 +9,10 @@ import {
 import React from "react";
 import CustomHeader from "../components/CustomHeader";
 import { useFonts, Philosopher_700Bold } from "@expo-google-fonts/philosopher";
+import { useDispatch, useSelector } from "react-redux";
+import { useLogoutMutation } from "../../redux/api/authApi";
+import { useNavigation } from "@react-navigation/native";
+import { logout } from "../../redux/slices/authSlice";
 
 const orders = [
   {
@@ -61,14 +65,33 @@ const orders = [
 const orderSteps = ["order", "shipped", "delivered"];
 
 const ProfileScreen = () => {
-  const userData = {
-    username: "Mukesh Choudhary",
-    email: "mukesh123@gmail.com",
-  };
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const [triggerLogout, { isLoading, error }] = useLogoutMutation();
 
   let [fontsLoaded] = useFonts({
     Philosopher_700Bold,
   });
+
+  // const userData = {
+  //   username: "Mukesh Choudhary",
+  //   email: "mukesh123@gmail.com",
+  // };
+
+  const userData = useSelector((state) => state.auth.user); 
+
+  console.log("user",userData)
+
+  const handleLogout = async () => {
+    try {
+      await triggerLogout().unwrap();
+      dispatch(logout());
+      // localStorage.removeItem("token");
+      navigation.reset({ index: 0, routes: [{ name: "auth" }] });
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
   const renderOrderItem = ({ item, index }) => {
     // Colors for different order cards
@@ -115,7 +138,7 @@ const ProfileScreen = () => {
             <View style={[styles.statusBadge, { backgroundColor: color }]}>
               <Text style={styles.statusText}>
                 {/* {icon} {label} */}
-                 {label}
+                {label}
               </Text>
             </View>
           </View>
@@ -174,17 +197,16 @@ const ProfileScreen = () => {
           </View>
           <View style={styles.userDetails}>
             <View>
-            <Text style={styles.username}>{userData.username}</Text>
-            <Text style={styles.email}>{userData.email}</Text>
+              <Text style={styles.username}>{userData?.username}</Text>
+              <Text style={styles.email}>{userData?.email}</Text>
             </View>
-            <TouchableOpacity style={styles.editButton}>
+            <TouchableOpacity style={styles.editButton} onPress={handleLogout}>
               <Text style={styles.editText}>Logout</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
       <View style={styles.contentContainer}>
-        {/* <Text style={styles.sectionTitle}>Order History</Text> */}
         <FlatList
           data={orders}
           keyExtractor={(item) => item.id.toString()}
@@ -196,7 +218,9 @@ const ProfileScreen = () => {
               <Text style={styles.emptyText}>No orders found</Text>
             </View>
           }
-          ListHeaderComponent={ <Text style={styles.sectionTitle}>Order History</Text>}
+          ListHeaderComponent={
+            <Text style={styles.sectionTitle}>Order History</Text>
+          }
         />
       </View>
     </View>
@@ -252,8 +276,8 @@ const styles = StyleSheet.create({
   //   fontFamily: "Philosopher_700Bold",
   // },
   editButton: {
-    marginTop:5,
-    height:40,
+    marginTop: 5,
+    height: 40,
     paddingVertical: 8,
     paddingHorizontal: 16,
     backgroundColor: "#002140",
@@ -267,20 +291,18 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   userDetails: {
-    // marginTop: 20,
     flexDirection: "row",
-    justifyContent:"space-around"
+    justifyContent: "space-around",
   },
   username: {
     fontSize: 24,
     color: "#002140",
-    fontFamily: "Philosopher_700Bold",
+    fontWeight:600,
     marginBottom: 3,
   },
   email: {
     fontSize: 16,
     color: "#002140",
-    // color: "rgba(255, 255, 255, 0.9)",
   },
   contentContainer: {
     flex: 1,
@@ -356,9 +378,9 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   orderSubtitle: {
-    marginTop:-8,
+    marginTop: -8,
     fontSize: 16,
-    fontWeight:600,
+    fontWeight: 600,
     color: "#6C757D",
     marginBottom: 8,
   },
@@ -374,7 +396,7 @@ const styles = StyleSheet.create({
   },
   orderId: {
     fontSize: 16,
-    fontWeight:500,
+    fontWeight: 500,
     color: "#94A3B8",
   },
   progressContainer: {
@@ -394,7 +416,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 4,
-    
   },
   stepText: {
     color: "#002140",
@@ -403,7 +424,7 @@ const styles = StyleSheet.create({
   },
   stepLabel: {
     fontSize: 14,
-    fontWeight:600,
+    fontWeight: 600,
     color: "#94A3B8",
     textAlign: "center",
     textTransform: "capitalize",
@@ -418,5 +439,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-

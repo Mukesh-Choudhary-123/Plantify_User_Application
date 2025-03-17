@@ -19,32 +19,29 @@ import { useDispatch } from "react-redux";
 const LoginScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("mukesh123@gmail.com");
+  const [password, setPassword] = useState("Qwert@123");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Destructure the login function and mutation status from the hook
   const [login, { isLoading }] = useLoginMutation();
 
   const handleSubmit = async () => {
-    // Basic validation
     if (!email || !password) {
       setErrorMsg("Please fill in both fields.");
       return;
     }
     try {
-      // Attempt login with credentials
       const userData = await login({ email, password }).unwrap();
       console.log("User:", userData);
-      // Clear the fields on success
+      console.log("Wishlist:", JSON.stringify(userData.wishlist, null, 2));
+
       setEmail("");
       setPassword("");
       setErrorMsg("");
       dispatch(setCredentials({ user: userData.user, token: userData.token }));
       navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
     } catch (err) {
-      navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
+      // navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
       console.error("Login error:", err);
       setErrorMsg("Login failed. Please check your credentials.");
     }

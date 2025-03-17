@@ -1,0 +1,1 @@
+ export const IP="193.168.0.195"

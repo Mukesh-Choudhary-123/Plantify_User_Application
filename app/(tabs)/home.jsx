@@ -1,4 +1,6 @@
 import {
+  ActivityIndicator,
+  FlatList,
   Image,
   ScrollView,
   StyleSheet,
@@ -7,41 +9,104 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import CustomBanner from "../components/CustomBanner";
-import CustomProductList from "../components/CustomProductList";
 import CustomHeader from "../components/CustomHeader";
-import CustomShape from "../components/CustomShape";
 import {
   useFonts,
   Philosopher_400Regular,
   Philosopher_700Bold,
 } from "@expo-google-fonts/philosopher";
-import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { useGetProductsQuery } from "../../redux/api/productApi";
+import ProductCard from "../components/CustomProductList";
 
+const OPTION_WIDTH = 100;
 const HomeScreen = () => {
   let [fontsLoaded] = useFonts({
     Philosopher_400Regular,
     Philosopher_700Bold,
   });
 
-  const{data,isLoading,isError}=useGetProductsQuery()
-  
-  console.log("Product:- ",data?.products)
+  const colors = [
+    "#9CE5CB",
+    "#FDC7BE",
+    "#FFE899",
+    "#56D1A7",
+    "#B2E28D",
+    "#DEEC8A",
+    "#F5EDA8",
+  ];
+  const options = [
+    "Top Pick",
+    "Indoor",
+    "Outdoor",
+    "Fertilizer",
+    "Plants",
+    "Flowers",
+    "Herbs",
+    "Seeds",
+    "Fruits",
+    "Vegetables",
+  ];
 
-  const options = ["Top Pick", "Indoor", "Outdoor", "Seed", "Fertilizer", "Pots", "Tools", "Decor"];
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [selectedOption, setSelectedOption] = useState("Top Pick");
+  const [selectedOption, setSelectedOption] = useState("");
+  const [products, setProducts] = useState([]);
+  const [isFetching, setIsFetching] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
-  return (
-    <View style={styles.container}>
-      {/* <CustomHeader color="#66C6A3" /> */}
-      <CustomHeader />
-      <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false}>
+  const onEndReachedCalledDuringMomentum = useRef(true);
+
+  const { data, error, isLoading } = useGetProductsQuery({
+    page,
+    limit: 5,
+    search: search,
+    category: selectedOption,
+  });
+
+  console.log("Page:", page);
+  console.log("Category:", selectedOption);
+  console.log("Search:", search);
+
+  // Reset pagination and products when filter or search changes
+  useEffect(() => {
+    setPage(1);
+    setProducts([]);
+    setHasMore(true);
+  }, [search, selectedOption]);
+
+  useEffect(() => {
+    if (data?.products) {
+      setProducts((prevProducts) =>
+        page === 1 ? data.products : [...prevProducts, ...data.products]
+      );
+      if (page >= data.totalPages) {
+        setHasMore(false);
+      }
+    }
+    setIsFetching(false);
+  }, [data]);
+
+  const loadMoreProducts = () => {
+    if (!isFetching && hasMore) {
+      setIsFetching(true);
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
+
+  const handleClearFilter = () => {
+    setSearch("");
+    setSelectedOption("");
+  };
+
+  const renderHeader = () => {
+    return (
+      <>
+        <CustomHeader />
         <CustomBanner />
-
-        {/* Search Bar with Icon */}
+        {/* Search Bar */}
         <View style={{ flexDirection: "row" }}>
           <View style={styles.searchContainer}>
             <FontAwesome
@@ -58,41 +123,131 @@ const HomeScreen = () => {
               value={search}
             />
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleClearFilter}>
             <Image
               source={require("@/assets/images/filterIcon.png")}
               style={styles.filterIcon}
             />
           </TouchableOpacity>
         </View>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterContainer}>
+        {/* Category Filter */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterContainer}
+        >
           {options.map((option, key) => (
             <TouchableOpacity
               key={key}
               style={[
                 styles.filterButton,
-                selectedOption === option && styles.activeFilterButton, // Apply active style if selected
+                selectedOption === option && styles.activeFilterButton,
               ]}
-              onPress={() => setSelectedOption(option)} // Update state on press
+              onPress={() => setSelectedOption(option)}
             >
               <Text
                 style={[
                   styles.filterText,
-                  selectedOption === option && styles.activeFilterText, // Change text color if selected
+                  selectedOption === option && styles.activeFilterText,
                 ]}
               >
                 {option}
               </Text>
             </TouchableOpacity>
           ))}
-            </ScrollView>
-       
-        <View style={{paddingBottom:10}}>
-          
-        <CustomProductList />
+        </ScrollView>
+      </>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="black" />
         </View>
-      </ScrollView>
+      )}
+      <FlatList
+        key={selectedOption} // Forces re-render when selected option changes
+        data={products}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item, index }) => (
+          <ProductCard
+            id={item.id}
+            title={item.title}
+            subtitle={item.subtitle}
+            prices={item.price}
+            image={item.thumbnail}
+            description={item.description}
+            bgColor={colors[index % colors.length]}
+          />
+        )}
+        onMomentumScrollBegin={() => {
+          onEndReachedCalledDuringMomentum.current = false;
+        }}
+        onEndReached={() => {
+          if (!onEndReachedCalledDuringMomentum.current) {
+            loadMoreProducts();
+            onEndReachedCalledDuringMomentum.current = true;
+          }
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={() => {
+          if (isFetching) {
+            return (
+              <ActivityIndicator
+                size="large"
+                color="#000"
+                style={{ marginTop: 10 }}
+              />
+            );
+          }
+          if (!hasMore && products.length > 0) {
+            return (
+              <Text style={{ textAlign: "center", padding: 5 }}>
+                No more products
+              </Text>
+            );
+          }
+          if (isLoading) {
+            // Ensure you return the view!
+            return (
+              <View
+                style={{
+                  justifyContent: "center",
+                  alignSelf: "center",
+                  height: "100%",
+                }}
+              >
+                <ActivityIndicator size="large" color="black" />
+              </View>
+            );
+          }
+          return null;
+        }}
+        ListEmptyComponent={() => {
+          if (isFetching || isLoading) {
+            return (
+              <View
+                style={{
+                  justifyContent: "center",
+                  alignSelf: "center",
+                  height: "100%",
+                }}
+              >
+                <ActivityIndicator size="large" color="black" />
+              </View>
+            );
+          }
+          return (
+            <Text style={{ textAlign: "center", marginTop: 20 }}>
+              No matching products found
+            </Text>
+          );
+        }}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={renderHeader}
+      />
     </View>
   );
 };
@@ -103,6 +258,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+  },loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
   },
   searchContainer: {
     flexDirection: "row",
@@ -142,7 +306,7 @@ const styles = StyleSheet.create({
     marginLeft: 7,
   },
   activeFilterButton: {
-    backgroundColor: "#0D986A", 
+    backgroundColor: "#0D986A",
     borderColor: "#0D986A",
   },
   filterText: {
