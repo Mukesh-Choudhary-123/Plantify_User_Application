@@ -6,6 +6,7 @@ import {
   FlatList,
   Pressable,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import React from "react";
 import CustomText from "../components/CustomText";
@@ -13,7 +14,11 @@ import { useFonts, Philosopher_700Bold } from "@expo-google-fonts/philosopher";
 import { useNavigation } from "@react-navigation/native";
 import CustomHeader from "../components/CustomHeader";
 import { FontAwesome } from "@expo/vector-icons";
-
+import { useSelector } from "react-redux";
+import { useGetWishlistQuery } from "../../redux/api/wishlistApi";
+import LottieView from "lottie-react-native";
+import EmptyCart from "../../assets/animation/EmptyCart.json";
+const { width, height } = Dimensions.get("window");
 const colors = [
   "#9CE5CB",
   "#FDC7BE",
@@ -38,7 +43,10 @@ const ProductCard = ({ id, title, subtitle, prices, image, bgColor }) => {
   };
 
   return (
-    <TouchableOpacity onPress={handlePress} style={{ padding:5,flexDirection:"row", flexWrap:"wrap"}}>
+    <TouchableOpacity
+      onPress={handlePress}
+      style={{ padding: 5, flexDirection: "row", flexWrap: "wrap" }}
+    >
       <View style={[styles.container, { backgroundColor: bgColor }]}>
         <Image
           source={require("@/assets/images/Vector.png")}
@@ -48,16 +56,16 @@ const ProductCard = ({ id, title, subtitle, prices, image, bgColor }) => {
           source={require("@/assets/images/Vector2.png")}
           style={styles.vector2}
         />
-        <TouchableOpacity style={{position:"absolute" , left:135 ,marginTop:12}}>
+        {/* <TouchableOpacity style={{position:"absolute" , left:135 ,marginTop:12}}>
             <FontAwesome name="heart" size={30} color={"#002140"} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <View>
           <View style={{ flexDirection: "row", gap: 20 }}>
             <CustomText text={subtitle} style={styles.subtitle} />
-            {/* <Image
+            <Image
               source={require("@/assets/images/tagIcon.png")}
               style={styles.tagIcon}
-            /> */}
+            />
           </View>
           <Text style={styles.title} numberOfLines={1}>
             {title}
@@ -72,152 +80,54 @@ const ProductCard = ({ id, title, subtitle, prices, image, bgColor }) => {
 };
 
 const WishlistScreen = () => {
-  const products = [
-    {
-      id: 3729819873984234,
-      title: "Aleo Vera",
-      prices: 200,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810277/sfqzlryj35d3qirkrmd9.png",
-    },
-    {
-      id: 3729819873984235,
-      title: "Peace Lily",
-      prices: 300,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810275/vf6t8uxpsieqvmlk6vau.png",
-    },
-    {
-      id: 3729819873984236,
-      title: "Spider Plant",
-      prices: 220,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/zcwyruubsttbphlcfwhr.png",
-    },
-    {
-      id: 3729819873984237,
-      title: "Money Plant",
-      prices: 180,
-      subtitle: "Indoor Plant",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/y5ne7fz3zcucplxjjblu.png",
-    },
-    {
-      id: 3729819873984238,
-      title: "Jade Plant",
-      prices: 270,
-      subtitle: "Succulent",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810279/c1fuea1c20gw3p7z5jir.png",
-    },
-    {
-      id: 37298198739842342,
-      title: "Aleo Vera",
-      prices: 200,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810277/sfqzlryj35d3qirkrmd9.png",
-    },
-    {
-      id: 37298198739842353,
-      title: "Peace Lily",
-      prices: 300,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810275/vf6t8uxpsieqvmlk6vau.png",
-    },
-    {
-      id: 37298198739842363,
-      title: "Spider Plant",
-      prices: 220,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/zcwyruubsttbphlcfwhr.png",
-    },
-    {
-      id: 37298198739842371,
-      title: "Money Plant",
-      prices: 180,
-      subtitle: "Indoor Plant",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/y5ne7fz3zcucplxjjblu.png",
-    },
-    {
-      id: 37298198739842381,
-      title: "Jade Plant",
-      prices: 270,
-      subtitle: "Succulent",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810279/c1fuea1c20gw3p7z5jir.png",
-    },
-    {
-      id: 37298198739842346,
-      title: "Aleo Vera",
-      prices: 200,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810277/sfqzlryj35d3qirkrmd9.png",
-    },
-    {
-      id: 37298198739842357,
-      title: "Peace Lily",
-      prices: 300,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810275/vf6t8uxpsieqvmlk6vau.png",
-    },
-    {
-      id: 37298198739842368,
-      title: "Spider Plant",
-      prices: 220,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/zcwyruubsttbphlcfwhr.png",
-    },
-    {
-      id: 37298198739842379,
-      title: "Money Plant",
-      prices: 180,
-      subtitle: "Indoor Plant",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/y5ne7fz3zcucplxjjblu.png",
-    },
-    {
-      id: 37298198739842380,
-      title: "Jade Plant",
-      prices: 270,
-      subtitle: "Succulent",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810279/c1fuea1c20gw3p7z5jir.png",
-    },
-    // ... add other products as needed
-  ];
+  const userData = useSelector((state) => state.auth.user);
+  const {
+    data: wishlistData,
+    isError: isWishlistError,
+    isLoading: isWishlistLoading,
+    error,
+  } = useGetWishlistQuery(userData?.id, { skip: !userData?.id });
+
+  console.log("wishlistData : ", wishlistData?.wishlist);
+
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <CustomHeader />
-      <View style={{paddingHorizontal:10 , paddingBottom:70}}>
-
-      <FlatList
-        data={products}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item, index }) => (
-          <ProductCard
-            id={item.id}
-            title={item.title}
-            subtitle={item.subtitle}
-            prices={item.prices}
-            image={item.image}
-            bgColor={colors[index % colors.length]}
-          />
-        )}
-        numColumns={2}
+      {wishlistData?.wishlist.length === 0 && (
+        <View style={{ width: "100%", height: "100%", alignItems: "center" }}>
+          <LottieView source={EmptyCart} autoPlay loop style={styles.lottie} />
+          <Text
+            style={{
+              fontSize: 20,
+              textAlign: "center",
+              marginTop: -50,
+              fontWeight: 600,
+              color: "#002140",
+            }}
+          >
+            Your Wishlist is Empty {'\n'} Start{" "}
+            <Text style={{ color: "#0D986A" }}>Dreaming!</Text>
+          </Text>
+        </View>
+      )}
+      <View style={{ paddingHorizontal: 10, paddingBottom: 70 }}>
+        <FlatList
+          data={wishlistData?.wishlist}
+          keyExtractor={(item) => item._id.toString()}
+          renderItem={({ item, index }) => (
+            <ProductCard
+              id={item._id}
+              title={item.title}
+              subtitle={item.subtitle}
+              prices={item.price}
+              image={item.thumbnail}
+              bgColor={colors[index % colors.length]}
+            />
+          )}
+          numColumns={2}
           showsVerticalScrollIndicator={false}
         />
       </View>
-        
     </View>
   );
 };
@@ -238,6 +148,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 3,
+  },
+  lottie: {
+    alignSelf: "center",
+    width: width * 1,
+    height: height * 0.7,
   },
   vector: {
     position: "absolute",

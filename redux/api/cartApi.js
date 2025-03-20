@@ -1,35 +1,40 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IP } from "../../constant"; 
+import { IP } from "../../constant";
 
 export const cartApi = createApi({
   reducerPath: "cartApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `http://${IP}:8080/api/v1/cart`,
   }),
+  tagTypes: ["Cart"],
   endpoints: (builder) => ({
     getCart: builder.query({
-      query: () => "cart/",
+      query: (id) => `/${id}`,
+      providesTags: (result, error, id) => [{ type: "Cart", id }],
     }),
     addToCart: builder.mutation({
-      query: (data) => ({
-        url: "cart/",
+      query: ({ id, productId }) => ({
+        url: `/${id}`,
         method: "POST",
-        body: data,
+        body: { productId },
       }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Cart", id }],
     }),
     removeFromCart: builder.mutation({
-      query: (data) => ({
-        url: "cart/",
+      query: ({ id, productId }) => ({
+        url: `/${id}`,
         method: "DELETE",
-        body: data,
+        body: { productId },
       }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Cart", id }],
     }),
     updateToCart: builder.mutation({
-      query: (data) => ({
-        url: "cart/",
+      query: ({ id, productId, action }) => ({
+        url: `/${id}`,
         method: "PUT",
-        body: data,
+        body: { productId, action },
       }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Cart", id }],
     }),
   }),
 });

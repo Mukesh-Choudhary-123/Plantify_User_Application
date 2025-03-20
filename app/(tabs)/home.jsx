@@ -239,11 +239,11 @@ const HomeScreen = () => {
               </View>
             );
           }
-          return (
-            <Text style={{ textAlign: "center", marginTop: 20 }}>
-              No matching products found
-            </Text>
-          );
+          // return (
+          //   <Text style={{ textAlign: "center", marginTop: 20 }}>
+          //     No matching products found
+          //   </Text>
+          // );
         }}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={renderHeader}

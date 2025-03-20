@@ -16,6 +16,24 @@ const authSlice = createSlice({
       state.user = user;
       state.token = token;
     },
+    setAddress: (state, action) => {
+      const { address } = action.payload;
+      if (state.user) {
+        state.user.address = address;
+      }
+    },
+    setCart: (state, action) => {
+      const { cart } = action.payload;
+      if (state.user) {
+        state.user.cart = cart;
+      }
+    },
+    setWishlist: (state, action) => {
+      const { wishlist } = action.payload;
+      if (state.user) {
+        state.user.wishlist = wishlist;
+      }
+    },
     logout: (state) => {
       state.isAuthenticated = false;
       state.user = null;
@@ -24,6 +42,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, setAddress, setCart, setWishlist, logout } =
+  authSlice.actions;
 
 export default authSlice.reducer;

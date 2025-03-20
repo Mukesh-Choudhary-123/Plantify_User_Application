@@ -5,14 +5,23 @@ import {
   View,
   TouchableOpacity,
   FlatList,
+  Dimensions,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CustomHeader from "../components/CustomHeader";
 import { useFonts, Philosopher_700Bold } from "@expo-google-fonts/philosopher";
 import { FontAwesome } from "@expo/vector-icons";
 import CustomButton from "../components/CustomButton";
 import { useNavigation } from "@react-navigation/native";
-
+import {
+  useGetCartQuery,
+  useRemoveFromCartMutation,
+  useUpdateToCartMutation,
+} from "../../redux/api/cartApi";
+import { useSelector } from "react-redux";
+import LottieView from "lottie-react-native";
+import EmptyCart from "../../assets/animation/EmptyCart.json";
+const { width, height } = Dimensions.get("window");
 const colors = [
   "#9CE5CB",
   "#FDC7BE",
@@ -27,150 +36,81 @@ const CartScreen = () => {
   let [fontsLoaded] = useFonts({
     Philosopher_700Bold,
   });
-
   const navigation = useNavigation();
 
-  // Product List (with state for quantity management)
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      title: "Aloe Vera",
-      price: 200,
-      quantity: 1,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810277/sfqzlryj35d3qirkrmd9.png",
-    },
-    {
-      id: 2,
-      title: "Peace Lily",
-      price: 300,
-      quantity: 1,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810275/vf6t8uxpsieqvmlk6vau.png",
-    },
-    {
-      id: 3,
-      title: "Spider Plant",
-      price: 220,
-      quantity: 1,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/zcwyruubsttbphlcfwhr.png",
-    },
-    {
-      id: 4,
-      title: "Money Plant",
-      price: 180,
-      quantity: 1,
-      subtitle: "Indoor Plant",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/y5ne7fz3zcucplxjjblu.png",
-    },
-    {
-      id: 5,
-      title: "Jade Plant",
-      price: 270,
-      quantity: 1,
-      subtitle: "Succulent",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810279/c1fuea1c20gw3p7z5jir.png",
-    },
-    {
-      id: 6,
-      title: "Aloe Vera",
-      price: 200,
-      quantity: 1,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810277/sfqzlryj35d3qirkrmd9.png",
-    },
-    {
-      id: 7,
-      title: "Peace Lily",
-      price: 300,
-      quantity: 1,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810275/vf6t8uxpsieqvmlk6vau.png",
-    },
-    {
-      id: 8,
-      title: "Spider Plant",
-      price: 220,
-      quantity: 1,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/zcwyruubsttbphlcfwhr.png",
-    },
-    {
-      id: 9,
-      title: "Money Plant",
-      price: 180,
-      quantity: 1,
-      subtitle: "Indoor Plant",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/y5ne7fz3zcucplxjjblu.png",
-    },
-    {
-      id: 10,
-      title: "Jade Plant",
-      price: 270,
-      quantity: 1,
-      subtitle: "Succulent",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810279/c1fuea1c20gw3p7z5jir.png",
-    },
-  ]);
+  const userData = useSelector((state) => state.auth.user);
 
-  // Function to update quantity
-  const updateQuantity = (id, type) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              quantity:
-                type === "increase"
-                  ? item.quantity + 1
-                  : Math.max(1, item.quantity - 1),
-            }
-          : item
-      )
-    );
+  const {
+    data: fetchedData,
+    isLoading: isCartLoading,
+    isError: isCartError,
+    error: cartError,
+  } = useGetCartQuery(userData?.id, { skip: !userData?.id });
+
+  const userId = userData?.id;
+
+  const [
+    updateToCart,
+    {
+      isLoading: isUpdateToCartLoading,
+      isError: isUpdateToCartError,
+      isSuccess: isUpdateToCartSuccess,
+    },
+  ] = useUpdateToCartMutation();
+
+  const handleDecrease = (productId) => {
+    const action = "decrease";
+    updateToCart({ id: userId, productId, action });
   };
 
-  // Function to remove item from cart
-  const removeItem = (id) => {
-    setCartItems(cartItems.filter((item) => item.id !== id));
+  const handleIncrease = (productId) => {
+    const action = "increase";
+    updateToCart({ id: userId, productId, action });
   };
 
-  // Calculate total price
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const deliveryFee = 50;
-  const total = subtotal + deliveryFee;
+  const [
+    removeFromCart,
+    {
+      isLoading: isRemoveFromCartLoading,
+      isError: isRemoveFromCartError,
+      isSuccess: isRemoveFromCartSuccess,
+    },
+  ] = useRemoveFromCartMutation();
 
+  const handleRemove = (productId) => {
+    removeFromCart({ id: userId, productId });
+  };
 
   const handlePlaceOrder = () => {
     navigation.navigate("PlaceOrder");
-  }
+  };
 
   return (
     <View style={styles.container}>
       <CustomHeader />
-      {/* <Text style={styles.headingText}>Your Cart</Text> */}
-
+      {/* <Text style={styles.headingText}>My Cart</Text> */}
+      {fetchedData?.cart.length === 0 && (
+        <View style={{ width: "100%", height: "100%", alignItems: "center" }}>
+          <LottieView source={EmptyCart} autoPlay loop style={styles.lottie} />
+          <Text
+            style={{
+              fontSize: 20,
+              textAlign: "center",
+              marginTop: -50,
+              fontWeight: 600,
+              color: "#002140",
+            }}
+          >
+            Time to Shop {"\n"} Your Cart is <Text style={{color:"#0D986A"}}>Lonely!</Text>
+          </Text>
+        </View>
+      )}
       <FlatList
-        data={cartItems}
+        data={fetchedData?.cart}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
         renderItem={({ item, index }) => (
-          // Use a different background color for each card by cycling through the colors array
           <View
             style={[
               styles.card,
@@ -187,34 +127,36 @@ const CartScreen = () => {
             />
             <View style={styles.productContainer}>
               <Image source={{ uri: item.image }} style={styles.image} />
-
               <View style={styles.detailsContainer}>
                 <View>
                   <Text style={styles.title}>{item.title}</Text>
                   <Text style={styles.subtitle}>{item.subtitle}</Text>
                 </View>
-
                 <View style={styles.quantityContainer}>
                   <TouchableOpacity
-                    style={styles.quantityButton}
-                    onPress={() => updateQuantity(item.id, "decrease")}
+                    disabled={item.quantity === 1}
+                    style={[
+                      styles.quantityButton,
+                      item.quantity === 1 && { opacity: 0.5 },
+                    ]}
+                    onPress={() => handleDecrease(item.productId)}
                   >
                     <FontAwesome name="minus" size={18} color="#FFF" />
                   </TouchableOpacity>
+
                   <Text style={styles.quantityText}>{item.quantity}</Text>
                   <TouchableOpacity
                     style={styles.quantityButton}
-                    onPress={() => updateQuantity(item.id, "increase")}
+                    onPress={() => handleIncrease(item.productId)}
                   >
                     <FontAwesome name="plus" size={18} color="#FFF" />
                   </TouchableOpacity>
                 </View>
               </View>
-
               <View style={styles.rightSection}>
                 <TouchableOpacity
                   style={styles.deleteButton}
-                  onPress={() => removeItem(item.id)}
+                  onPress={() => handleRemove(item.productId)}
                 >
                   <FontAwesome name="trash-o" size={22} color="#FF4D4F" />
                 </TouchableOpacity>
@@ -224,11 +166,15 @@ const CartScreen = () => {
           </View>
         )}
       />
-
-      {/* Checkout Button */}
-
-      <CustomButton text="Place Order" style={{marginTop:15}} onPress={handlePlaceOrder}/>
-
+      {fetchedData?.cart.length > 0 && (
+        <View style={{ marginVertical: 10 }}>
+          <CustomButton
+            text="Place Order"
+            style={{ marginTop: 15 }}
+            onPress={handlePlaceOrder}
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -237,6 +183,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#ffffff",
+  },
+  lottie: {
+    alignSelf: "center",
+    width: width * 1,
+    height: height * 0.7,
   },
   vector: {
     position: "absolute",
@@ -256,11 +207,12 @@ const styles = StyleSheet.create({
     // paddingBottom: 20,
   },
   headingText: {
-    fontSize: 28,
+    fontSize: 23,
     fontFamily: "Philosopher_700Bold",
     color: "#0D986A",
     // marginVertical: 20,
     marginLeft: 20,
+    textAlign: "center",
   },
   card: {
     borderRadius: 16,
@@ -294,7 +246,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    fontWeight:500,
+    fontWeight: 500,
     color: "#6C757D",
   },
   quantityContainer: {
@@ -330,7 +282,7 @@ const styles = StyleSheet.create({
   },
   totalsCard: {
     borderTopWidth: 1,
-    borderTopColor:"#0D986A",
+    borderTopColor: "#0D986A",
     paddingTop: 10,
     paddingHorizontal: 20,
     marginBottom: 16,

@@ -23,27 +23,42 @@ import { useSelector } from "react-redux";
 import {
   useAddToWishlistMutation,
   useGetWishlistQuery,
+  useRemoveFromWishlistMutation,
 } from "../../redux/api/wishlistApi";
+import {
+  useAddToCartMutation,
+  useGetCartQuery,
+  useRemoveFromCartMutation,
+} from "../../redux/api/cartApi";
 
 const ProductDetails = ({ route }) => {
   const { productId, cardColor } = route.params;
+
   let [fontsLoaded] = useFonts({
     Philosopher_700Bold,
   });
+
   const id = productId;
+  console.log("product-ID -**-", id);
+  const { data, isLoading, isError, isFetching } = useProductDetailsQuery(id);
+
   const userData = useSelector((state) => state.auth.user);
+
+  //**************** WishList *******************//
+
   const {
     data: wishlistData,
     isError: isWishlistError,
     isLoading: isWishlistLoading,
     error,
   } = useGetWishlistQuery(userData?.id, { skip: !userData?.id });
-  
 
-  console.log("userWishlist :- ", wishlistData?.wishlist);
-  console.log("user-wishlist :- ", userData?.wishlist);
+  // console.log("Get Wishlist :=== ", wishlistData?.wishlist)
 
-  const { data, isLoading, isError, isFetching } = useProductDetailsQuery(id);
+  const wishlistIds = wishlistData?.wishlist?.map((item) => item._id);
+  const isProductInWishlist = wishlistIds?.includes(productId);
+  // console.log("Wishlist IDs:", wishlistIds);
+  // console.log("isProductInWishlist:", isProductInWishlist);
 
   const [
     addToWishlist,
@@ -53,6 +68,73 @@ const ProductDetails = ({ route }) => {
       isSuccess: isAddToWishlistSuccess,
     },
   ] = useAddToWishlistMutation();
+
+  const [
+    removeFromWishlist,
+    {
+      isLoading: isRemoveFromLoading,
+      isError: isRemoveFromError,
+      isSuccess: isRemoveFromSuccess,
+    },
+  ] = useRemoveFromWishlistMutation();
+
+  const handleWishlist = () => {
+    const userId = userData?.id;
+    if (isProductInWishlist) {
+      removeFromWishlist({ id: userId, productId });
+      console.log("Product is already in wishlist");
+    } else {
+      addToWishlist({ id: userId, productId });
+      console.log("Product added in wishlist");
+    }
+  };
+
+  //************** Cart *************//
+
+  const {
+    data: cartData,
+    isLoading: isCartLoading,
+    isError: isCartError,
+    error: cartError,
+  } = useGetCartQuery(userData?.id, { skip: !userData?.id });
+
+  console.log("cartData :- ", cartData);
+
+
+  const cartProductIds = cartData?.cart?.map((item) => item.productId);
+  const isProductInCart = cartProductIds?.includes(productId);
+  
+  console.log("cartProductIds :- ", cartProductIds);
+  console.log("isProductInCart :- ", isProductInCart);
+  
+  const [
+    addToCart,
+    {
+      isLoading: isAddToCartLoading,
+      isError: isAddToCartError,
+      isSuccess: isAddToCartSuccess,
+    },
+  ] = useAddToCartMutation();
+
+  const [
+    removeFromCart,
+    {
+      isLoading: isRemoveFromCartLoading,
+      isError: isRemoveFromCartError,
+      isSuccess: isRemoveFromCartSuccess,
+    },
+  ] = useRemoveFromCartMutation();
+
+  const handleCart = () => {
+    const userId = userData?.id;
+    if (isProductInCart) {
+      removeFromCart({ id: userId, productId });
+      console.log("Product is already in cart");
+    } else {
+      addToCart({ id: userId, productId });
+      console.log("Product added in cart");
+    }
+  };
 
   const product = data?.product;
   const [expandedSection, setExpandedSection] = React.useState(null);
@@ -70,14 +152,6 @@ const ProductDetails = ({ route }) => {
       </View>
     </View>
   );
-
-  const handleWishlist = () => {
-    const productIdFromRoute = id;
-    const userId = userData?.id;
-    const addedToWishlist = addToWishlist({ id: userId, productId: productIdFromRoute });
-    console.log("ADD :- ",addedToWishlist)
-  };
-
   return (
     <View style={styles.container}>
       <CustomHeader color={cardColor} />
@@ -116,13 +190,13 @@ const ProductDetails = ({ route }) => {
               style={{ paddingHorizontal: 20, paddingTop: 10, marginLeft: 10 }}
             >
               <View style={{ flexDirection: "row", gap: 10 }}>
-                <CustomText text={product.subtitle} style={styles.subtitle} />
+                <CustomText text={product?.subtitle} style={styles.subtitle} />
                 <Image
                   source={require("@/assets/images/tagIcon.png")}
                   style={styles.tagIcon}
                 />
               </View>
-              <Text style={styles.title}>{product.title}</Text>
+              <Text style={styles.title}>{product?.title}</Text>
               <View style={{ marginTop: 10 }}>
                 <Text
                   style={{ color: "grey", fontSize: 16, fontWeight: "700" }}
@@ -132,14 +206,28 @@ const ProductDetails = ({ route }) => {
                 <Text
                   style={{ color: "#002140", fontSize: 16, fontWeight: "600" }}
                 >
-                  ₹ {product.price}/- Rs.
+                  ₹ {product?.price}/- Rs.
                 </Text>
 
                 <View style={{ flexDirection: "row", marginTop: 20 }}>
-                  <Image
-                    source={require("@/assets/images/cart.png")}
-                    style={styles.cartIcon}
-                  />
+                  <TouchableOpacity onPress={handleCart} >
+                    {isAddToCartLoading || isRemoveFromCartLoading ? (
+                      <View style={{ marginTop:35 ,marginLeft:45 ,paddingRight:35}}>
+                        <ActivityIndicator size="small" color="#002140" />
+                      </View>
+                    ) : isProductInCart ? (
+                      <Image
+                        source={require("@/assets/images/cart2.png")}
+                        style={styles.cartIcon}
+                      />
+                    ) : (
+                      <Image
+                        source={require("@/assets/images/cart.png")}
+                        style={styles.cartIcon}
+                      />
+                    )}
+                  </TouchableOpacity>
+
                   <TouchableOpacity onPress={handleWishlist}>
                     <View
                       style={{
@@ -149,8 +237,15 @@ const ProductDetails = ({ route }) => {
                         marginLeft: 35,
                       }}
                     >
-                      <FontAwesome name="heart-o" size={30} color={"#002140"} />
-                      {/* <FontAwesome name="heart" size={30} color={"#002140"} /> */}
+                      {isAddToWishlistLoading || isRemoveFromLoading ? (
+                        <View style={{ marginLeft: 5, marginTop: 5 }}>
+                          <ActivityIndicator size="small" color="#002140" />
+                        </View>
+                      ) : isProductInWishlist ? (
+                        <FontAwesome name="heart" size={30} color="#002140" />
+                      ) : (
+                        <FontAwesome name="heart-o" size={30} color="#002140" />
+                      )}
                     </View>
                     <Image
                       source={require("@/assets/images/heartBg.png")}
@@ -161,7 +256,7 @@ const ProductDetails = ({ route }) => {
               </View>
             </View>
             <View>
-              <Image source={{ uri: product.thumbnail }} style={styles.image} />
+              <Image source={{ uri: product?.thumbnail }} style={styles.image} />
             </View>
           </View>
           <ScrollView>
@@ -306,7 +401,7 @@ const ProductDetails = ({ route }) => {
               </View>
             </View>
 
-            <CustomButton text="Add to Cart" />
+            <CustomButton text={isProductInCart ? "Remove from Cart" :"Add to Cart"} onPress={handleCart}/>
 
             <Text style={[styles.sectionTitle, { marginLeft: 35 }]}>
               Similar Plant

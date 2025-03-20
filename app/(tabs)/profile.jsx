@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/authApi";
 import { useNavigation } from "@react-navigation/native";
 import { logout } from "../../redux/slices/authSlice";
+import { useGetOrderQuery } from "../../redux/api/orderApi";
 
 const orders = [
   {
@@ -78,9 +79,18 @@ const ProfileScreen = () => {
   //   email: "mukesh123@gmail.com",
   // };
 
-  const userData = useSelector((state) => state.auth.user); 
+  const userData = useSelector((state) => state.auth.user);
+  const userId = userData?.id;
+  const {
+    data: fetchOrder,
+    isLoading: isOrderLoading,
+    isError: isOrderError,
+    error: orderError,
+  } = useGetOrderQuery(userId, { skip: !userData?.id });
 
-  console.log("user",userData)
+
+  console.log(JSON.stringify(fetchOrder?.orders, null, 2));
+  
 
   const handleLogout = async () => {
     try {
@@ -107,13 +117,13 @@ const ProfileScreen = () => {
 
     // Configuration for status badges
     const statusConfig = {
-      order: { icon: "⏳", color: "#FFB800", label: "Processing" },
-      shipped: { icon: "🚚", color: "#0D986A", label: "Shipped" },
-      delivered: { icon: "✅", color: "#2E7D32", label: "Delivered" },
-      cancelled: { icon: "❌", color: "#D32F2F", label: "Cancelled" },
+      order: {  color: "#FFB800", label: "Processing" },
+      shipped: { color: "#0D986A", label: "Shipped" },
+      delivered: { color: "#2E7D32", label: "Delivered" },
+      cancelled: { color: "#D32F2F", label: "Cancelled" },
     };
 
-    const { icon, color, label } = statusConfig[item.status.toLowerCase()];
+    const { color, label } = statusConfig[item.status.toLowerCase()];
     const currentStepIndex = orderSteps.indexOf(item.status.toLowerCase());
 
     return (
@@ -137,7 +147,6 @@ const ProfileScreen = () => {
             <Text style={styles.orderTitle}>{item.title}</Text>
             <View style={[styles.statusBadge, { backgroundColor: color }]}>
               <Text style={styles.statusText}>
-                {/* {icon} {label} */}
                 {label}
               </Text>
             </View>
@@ -183,17 +192,8 @@ const ProfileScreen = () => {
     <View style={styles.container}>
       <View style={styles.profileHeader}>
         <CustomHeader color="#56D1A7" />
-        {/* <CustomHeader  /> */}
         <View style={styles.profileContent}>
           <View style={styles.avatarContainer}>
-            {/* <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {userData.username.charAt(0)}
-              </Text>
-            </View> */}
-            {/* <TouchableOpacity style={styles.editButton}>
-              <Text style={styles.editText}>Logout</Text>
-            </TouchableOpacity> */}
           </View>
           <View style={styles.userDetails}>
             <View>
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 24,
     color: "#002140",
-    fontWeight:600,
+    fontWeight: 600,
     marginBottom: 3,
   },
   email: {

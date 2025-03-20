@@ -7,10 +7,7 @@ import CustomText from "../components/CustomText";
 import CustomPasswordInput from "../components/CustomPasswordInput";
 import {
   useFonts,
-  Philosopher_400Regular,
-  Philosopher_400Regular_Italic,
   Philosopher_700Bold,
-  Philosopher_700Bold_Italic,
 } from "@expo-google-fonts/philosopher";
 import { useLoginMutation } from "@/redux/api/authApi";
 import { setCredentials } from "@/redux/slices/authSlice";
@@ -32,13 +29,14 @@ const LoginScreen = () => {
     }
     try {
       const userData = await login({ email, password }).unwrap();
-      console.log("User:", userData);
-      console.log("Wishlist:", JSON.stringify(userData.wishlist, null, 2));
-
+      console.log("User:--------------", JSON.stringify(userData.user, null, 2));
+      console.log("Token :------ ",userData?.token)
       setEmail("");
       setPassword("");
       setErrorMsg("");
+      // dispatch(setCredentials({ user: JSON.stringify(userData.user, null, 2), token: userData.token }));
       dispatch(setCredentials({ user: userData.user, token: userData.token }));
+
       navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
     } catch (err) {
       // navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
@@ -52,10 +50,7 @@ const LoginScreen = () => {
   };
 
   let [fontsLoaded] = useFonts({
-    Philosopher_400Regular,
-    Philosopher_400Regular_Italic,
     Philosopher_700Bold,
-    Philosopher_700Bold_Italic,
   });
 
   return (
