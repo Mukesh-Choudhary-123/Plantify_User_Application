@@ -7,9 +7,12 @@ export const orderApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `http://${IP}:8080/api/v1/order`,
   }),
+  tagTypes: ["Order"],
   endpoints: (builder) => ({
     getOrder: builder.query({
       query: (userId) => `/${userId}`,
+      // Tag this query with the userId so that when a mutation invalidates that tag, it will refetch.
+      providesTags: (result, error, userId) => [{ type: "Order", id: userId }],
     }),
     createOrder: builder.mutation({
       query: ({ id, items, shippingAddress }) => ({
@@ -17,6 +20,8 @@ export const orderApi = createApi({
         method: "POST",
         body: { items, shippingAddress },
       }),
+      // Invalidate the Order tag for the given user id to trigger refetch in getOrder.
+      invalidatesTags: (result, error, { id }) => [{ type: "Order", id }],
       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -30,5 +35,3 @@ export const orderApi = createApi({
 });
 
 export const { useCreateOrderMutation, useGetOrderQuery } = orderApi;
-
-

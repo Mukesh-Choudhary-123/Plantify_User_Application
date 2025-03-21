@@ -5,6 +5,8 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
+  Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import React from "react";
 import CustomHeader from "../components/CustomHeader";
@@ -14,54 +16,10 @@ import { useLogoutMutation } from "../../redux/api/authApi";
 import { useNavigation } from "@react-navigation/native";
 import { logout } from "../../redux/slices/authSlice";
 import { useGetOrderQuery } from "../../redux/api/orderApi";
+import LottieView from "lottie-react-native";
+import EmptyCart from "../../assets/animation/EmptyCart.json";
+const { width, height } = Dimensions.get("window");
 
-const orders = [
-  {
-    id: 3729819873984234,
-    title: "Aloe Vera",
-    prices: 200,
-    subtitle: "Air Purifier",
-    image:
-      "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810277/sfqzlryj35d3qirkrmd9.png",
-    status: "order",
-  },
-  {
-    id: 3729819873984235,
-    title: "Peace Lily",
-    prices: 300,
-    subtitle: "Air Purifier",
-    image:
-      "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810275/vf6t8uxpsieqvmlk6vau.png",
-    status: "shipped",
-  },
-  {
-    id: 3729819873984236,
-    title: "Spider Plant",
-    prices: 220,
-    subtitle: "Air Purifier",
-    image:
-      "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/zcwyruubsttbphlcfwhr.png",
-    status: "delivered",
-  },
-  {
-    id: 3729819873984237,
-    title: "Money Plant",
-    prices: 180,
-    subtitle: "Indoor Plant",
-    image:
-      "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/y5ne7fz3zcucplxjjblu.png",
-    status: "cancelled",
-  },
-  {
-    id: 3729819873984238,
-    title: "Jade Plant",
-    prices: 270,
-    subtitle: "Succulent",
-    image:
-      "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810279/c1fuea1c20gw3p7z5jir.png",
-    status: "order",
-  },
-];
 
 const orderSteps = ["order", "shipped", "delivered"];
 
@@ -74,11 +32,6 @@ const ProfileScreen = () => {
     Philosopher_700Bold,
   });
 
-  // const userData = {
-  //   username: "Mukesh Choudhary",
-  //   email: "mukesh123@gmail.com",
-  // };
-
   const userData = useSelector((state) => state.auth.user);
   const userId = userData?.id;
   const {
@@ -88,15 +41,15 @@ const ProfileScreen = () => {
     error: orderError,
   } = useGetOrderQuery(userId, { skip: !userData?.id });
 
+  // Use orders as an array (default to an empty array if undefined)
+  const orders = fetchOrder?.orders || [];
 
-  console.log(JSON.stringify(fetchOrder?.orders, null, 2));
-  
+  // console.log("fetchOrder :- ", orders);
 
   const handleLogout = async () => {
     try {
       await triggerLogout().unwrap();
       dispatch(logout());
-      // localStorage.removeItem("token");
       navigation.reset({ index: 0, routes: [{ name: "auth" }] });
     } catch (err) {
       console.error("Logout failed:", err);
@@ -117,17 +70,29 @@ const ProfileScreen = () => {
 
     // Configuration for status badges
     const statusConfig = {
-      order: {  color: "#FFB800", label: "Processing" },
+      order: { color: "#FFB800", label: "Processing" },
       shipped: { color: "#0D986A", label: "Shipped" },
       delivered: { color: "#2E7D32", label: "Delivered" },
       cancelled: { color: "#D32F2F", label: "Cancelled" },
     };
 
-    const { color, label } = statusConfig[item.status.toLowerCase()];
-    const currentStepIndex = orderSteps.indexOf(item.status.toLowerCase());
+    // Map "pending" to "order"
+    const mappedStatus =
+      item.status && item.status.toLowerCase() === "pending"
+        ? "order"
+        : item.status
+        ? item.status.toLowerCase()
+        : "order";
+
+    const config = statusConfig[mappedStatus] || {
+      color: "#000",
+      label: "Unknown",
+    };
+    const { color, label } = config;
+    const currentStepIndex = orderSteps.indexOf(mappedStatus);
 
     return (
-      <TouchableOpacity
+      <View
         style={[
           styles.orderCard,
           { backgroundColor: colors[index % colors.length] },
@@ -146,17 +111,23 @@ const ProfileScreen = () => {
           <View style={styles.orderHeader}>
             <Text style={styles.orderTitle}>{item.title}</Text>
             <View style={[styles.statusBadge, { backgroundColor: color }]}>
-              <Text style={styles.statusText}>
-                {label}
-              </Text>
+              <Text style={styles.statusText}>{label}</Text>
             </View>
           </View>
           <Text style={styles.orderSubtitle}>{item.subtitle}</Text>
           <View style={styles.orderFooter}>
             <Text style={styles.orderPrice}>₹{item.prices}</Text>
-            <Text style={styles.orderId}>#{item.id.toString().slice(-6)}</Text>
+            <Text style={styles.orderId}>
+              #{item.id ? item.id.toString().slice(-6) : "N/A"}
+            </Text>
           </View>
-
+          {/* New block for totalAmount and totalItems */}
+          <View style={styles.totalsContainer}>
+            <Text style={styles.totalText}>
+              Total Amount: ₹{item.totalAmount}
+            </Text>
+            <Text style={styles.totalText}>Total Items: {item.totalItems}</Text>
+          </View>
           {item.status !== "cancelled" && (
             <View style={styles.progressContainer}>
               {orderSteps.map((step, idx) => (
@@ -184,7 +155,7 @@ const ProfileScreen = () => {
             </View>
           )}
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -193,8 +164,7 @@ const ProfileScreen = () => {
       <View style={styles.profileHeader}>
         <CustomHeader color="#56D1A7" />
         <View style={styles.profileContent}>
-          <View style={styles.avatarContainer}>
-          </View>
+          <View style={styles.avatarContainer}></View>
           <View style={styles.userDetails}>
             <View>
               <Text style={styles.username}>{userData?.username}</Text>
@@ -207,21 +177,81 @@ const ProfileScreen = () => {
         </View>
       </View>
       <View style={styles.contentContainer}>
-        <FlatList
-          data={orders}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderOrderItem}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.ordersList}
-          ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No orders found</Text>
-            </View>
-          }
-          ListHeaderComponent={
-            <Text style={styles.sectionTitle}>Order History</Text>
-          }
-        />
+        {/* {orders.length === 0 && (
+                <View style={{ width: "100%", height: "100%", alignItems: "center" ,marginTop:-48}}>
+                  <LottieView source={EmptyCart} autoPlay loop style={styles.lottie} />
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      textAlign: "center",
+                      marginTop: -50,
+                      fontWeight: 600,
+                      color: "#002140",
+                    }}
+                  >
+                    No problem {"\n"} Start shopping <Text style={{color:"#0D986A"}}>Now!</Text>
+                  </Text>
+                </View>
+              )} */}
+
+        {isOrderLoading ? (
+          <View style={{ marginTop: "70%", alignItems: "center" }}>
+            <ActivityIndicator size={"large"} color={"black"} />
+            <Text
+              style={{
+                fontSize: 18,
+                marginTop: 5,
+                fontWeight: 600,
+                color: "#002140",
+                marginLeft:15
+              }}
+            >
+              Loading...
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={orders}
+            keyExtractor={(item) =>
+              item.id ? item.id.toString() : Math.random().toString()
+            }
+            renderItem={renderOrderItem}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.ordersList}
+            ListEmptyComponent={
+              <View
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  alignItems: "center",
+                  top: -120,
+                }}
+              >
+                <LottieView
+                  source={EmptyCart}
+                  autoPlay
+                  loop
+                  style={styles.lottie}
+                />
+                <Text
+                  style={{
+                    fontSize: 20,
+                    textAlign: "center",
+                    marginTop: -50,
+                    fontWeight: 600,
+                    color: "#002140",
+                  }}
+                >
+                  No problem {"\n"} Start shopping{" "}
+                  <Text style={{ color: "#0D986A" }}>Now!</Text>
+                </Text>
+              </View>
+            }
+            ListHeaderComponent={
+              <Text style={styles.sectionTitle}>Order History</Text>
+            }
+          />
+        )}
       </View>
     </View>
   );
@@ -234,6 +264,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8FAFC",
   },
+  lottie: {
+    alignSelf: "center",
+    width: width * 1,
+    height: height * 0.7,
+  },
   profileHeader: {
     backgroundColor: "#56D1A7",
     paddingBottom: 15,
@@ -245,36 +280,12 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
   },
-  profileContent: {
-    // paddingHorizontal: 24,
-    // marginTop: 20,
-  },
+  profileContent: {},
   avatarContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  // avatar: {
-  //   width: 80,
-  //   height: 80,
-  //   borderRadius: 40,
-  //   backgroundColor: "#0D986A",
-  //   borderWidth: 2,
-  //   borderColor: "#002140",
-  //   alignItems: "center",
-  //   justifyContent: "center",
-  //   shadowColor: "#000",
-  //   shadowOffset: { width: 0, height: 2 },
-  //   shadowOpacity: 0.1,
-  //   shadowRadius: 8,
-  //   elevation: 4,
-  // },
-  // avatarText: {
-  //   color: "white",
-  //   fontSize: 36,
-  //   fontWeight: "600",
-  //   fontFamily: "Philosopher_700Bold",
-  // },
   editButton: {
     marginTop: 5,
     height: 40,
@@ -382,7 +393,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 600,
     color: "#6C757D",
-    marginBottom: 8,
+    // marginBottom: 8,
   },
   orderFooter: {
     flexDirection: "row",
@@ -398,6 +409,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 500,
     color: "#94A3B8",
+  },
+  totalsContainer: {
+    color: "#6C757D",
+  },
+  totalText: {
+    fontSize: 16,
+    color: "#6C757D",
   },
   progressContainer: {
     flexDirection: "row",

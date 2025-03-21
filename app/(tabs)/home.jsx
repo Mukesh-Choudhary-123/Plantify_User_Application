@@ -101,74 +101,83 @@ const HomeScreen = () => {
     setSelectedOption("");
   };
 
-  const renderHeader = () => {
-    return (
-      <>
-        <CustomHeader />
-        <CustomBanner />
-        {/* Search Bar */}
-        <View style={{ flexDirection: "row" }}>
-          <View style={styles.searchContainer}>
-            <FontAwesome
-              name="search"
-              size={20}
-              color="#002140"
-              style={styles.searchIcon}
-            />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search Plant"
-              placeholderTextColor="#002140"
-              onChangeText={setSearch}
-              value={search}
-            />
-          </View>
-          <TouchableOpacity onPress={handleClearFilter}>
-            <Image
-              source={require("@/assets/images/filterIcon.png")}
-              style={styles.filterIcon}
-            />
-          </TouchableOpacity>
+  const renderHeader = () => (
+    <View>
+      <CustomBanner />
+      {/* Search Bar */}
+      <View style={{ flexDirection: "row" }}>
+        <View style={styles.searchContainer}>
+          <FontAwesome
+            name="search"
+            size={20}
+            color="#002140"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search Plant"
+            placeholderTextColor="#002140"
+            onChangeText={setSearch}
+            value={search}
+          />
         </View>
-        {/* Category Filter */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterContainer}
-        >
-          {options.map((option, key) => (
-            <TouchableOpacity
-              key={key}
+        <TouchableOpacity onPress={handleClearFilter}>
+          <Image
+            source={require("@/assets/images/filterIcon.png")}
+            style={styles.filterIcon}
+          />
+        </TouchableOpacity>
+      </View>
+      {/* Category Filter */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.filterContainer}
+      >
+        {options.map((option, key) => (
+          <TouchableOpacity
+            key={key}
+            style={[
+              styles.filterButton,
+              selectedOption === option && styles.activeFilterButton,
+            ]}
+            onPress={() => setSelectedOption(option)}
+          >
+            <Text
               style={[
-                styles.filterButton,
-                selectedOption === option && styles.activeFilterButton,
+                styles.filterText,
+                selectedOption === option && styles.activeFilterText,
               ]}
-              onPress={() => setSelectedOption(option)}
             >
-              <Text
-                style={[
-                  styles.filterText,
-                  selectedOption === option && styles.activeFilterText,
-                ]}
-              >
-                {option}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </>
-    );
-  };
+              {option}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
+      <CustomHeader />
       {isLoading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="black" />
+          <Text
+            style={{
+              fontSize: 18,
+              marginTop: 5,
+              fontWeight: 600,
+              color: "#002140",
+              marginLeft: 15,
+            }}
+          >
+            Loading...
+          </Text>
         </View>
       )}
       <FlatList
-        key={selectedOption} // Forces re-render when selected option changes
+        key={selectedOption}
         data={products}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item, index }) => (
@@ -195,11 +204,24 @@ const HomeScreen = () => {
         ListFooterComponent={() => {
           if (isFetching) {
             return (
-              <ActivityIndicator
-                size="large"
-                color="#000"
-                style={{ marginTop: 10 }}
-              />
+              <View style={{  flexDirection:"row" ,alignSelf:"center" ,justifyContent:"center" }}>
+                <ActivityIndicator
+                  size="small"
+                  color="#000"
+                  style={{ marginTop: 10 }}
+                />
+                <Text
+                  style={{
+                    fontSize: 16,
+                    marginTop: 8,
+                    fontWeight: 600,
+                    color: "#002140",
+                    marginLeft: 5,
+                  }}
+                >
+                  loading more...
+                </Text>
+              </View>
             );
           }
           if (!hasMore && products.length > 0) {
@@ -210,7 +232,6 @@ const HomeScreen = () => {
             );
           }
           if (isLoading) {
-            // Ensure you return the view!
             return (
               <View
                 style={{
@@ -225,28 +246,23 @@ const HomeScreen = () => {
           }
           return null;
         }}
-        ListEmptyComponent={() => {
-          if (isFetching || isLoading) {
-            return (
-              <View
-                style={{
-                  justifyContent: "center",
-                  alignSelf: "center",
-                  height: "100%",
-                }}
-              >
-                <ActivityIndicator size="large" color="black" />
-              </View>
-            );
-          }
-          // return (
-          //   <Text style={{ textAlign: "center", marginTop: 20 }}>
-          //     No matching products found
-          //   </Text>
-          // );
-        }}
-        showsVerticalScrollIndicator={false}
+        // ListEmptyComponent={() => {
+        //   if (isFetching || isLoading) {
+        //     return (
+        //       <View
+        //         style={{
+        //           justifyContent: "center",
+        //           alignSelf: "center",
+        //           height: "100%",
+        //         }}
+        //       >
+        //         <ActivityIndicator size="small" color="black" />
+        //       </View>
+        //     );
+        //   }
+        // }}
         ListHeaderComponent={renderHeader}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -258,15 +274,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-  },loadingOverlay: {
-    position: 'absolute',
+  },
+  loadingOverlay: {
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 1,
+    marginTop: "40%",
   },
   searchContainer: {
     flexDirection: "row",

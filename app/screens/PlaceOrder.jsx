@@ -20,7 +20,6 @@ import { setAddress } from "../../redux/slices/authSlice";
 import { useCreateOrderMutation } from "../../redux/api/orderApi";
 import { useNavigation } from "@react-navigation/native";
 
-
 const colors = [
   "#9CE5CB",
   "#FDC7BE",
@@ -181,10 +180,15 @@ const PlaceOrder = () => {
     const shippingAddress = userData?.address[0];
     console.log("Click handlePlaceOrder");
     placeOrder({ id, items, shippingAddress })
-      .unwrap().
-      then()
+      .unwrap()
+      .then()
       .catch()
-      .finally(navigation.reset({ index: 0, routes: [{ name: "tabs" }] }));
+      .finally(
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "tabs", params: { screen: "profile" } }],
+        })
+      );
   };
 
   return (

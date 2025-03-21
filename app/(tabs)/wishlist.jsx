@@ -7,6 +7,7 @@ import {
   Pressable,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import React from "react";
 import CustomText from "../components/CustomText";
@@ -105,29 +106,46 @@ const WishlistScreen = () => {
               color: "#002140",
             }}
           >
-            Your Wishlist is Empty {'\n'} Start{" "}
+            Your Wishlist is Empty {"\n"} Start{" "}
             <Text style={{ color: "#0D986A" }}>Dreaming!</Text>
           </Text>
         </View>
       )}
-      <View style={{ paddingHorizontal: 10, paddingBottom: 70 }}>
-        <FlatList
-          data={wishlistData?.wishlist}
-          keyExtractor={(item) => item._id.toString()}
-          renderItem={({ item, index }) => (
-            <ProductCard
-              id={item._id}
-              title={item.title}
-              subtitle={item.subtitle}
-              prices={item.price}
-              image={item.thumbnail}
-              bgColor={colors[index % colors.length]}
-            />
-          )}
-          numColumns={2}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
+      {isWishlistLoading ? (
+        <View style={{ marginTop: "70%", alignItems: "center" }}>
+          <ActivityIndicator size={"large"} color={"black"} />
+          <Text
+            style={{
+              fontSize: 18,
+              marginTop: 5,
+              fontWeight: 600,
+              color: "#002140",
+              marginLeft: 15,
+            }}
+          >
+            Loading...
+          </Text>
+        </View>
+      ) : (
+        <View style={{ paddingHorizontal: 10, paddingBottom: 70 }}>
+          <FlatList
+            data={wishlistData?.wishlist}
+            keyExtractor={(item) => item._id.toString()}
+            renderItem={({ item, index }) => (
+              <ProductCard
+                id={item._id}
+                title={item.title}
+                subtitle={item.subtitle}
+                prices={item.price}
+                image={item.thumbnail}
+                bgColor={colors[index % colors.length]}
+              />
+            )}
+            numColumns={2}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
+      )}
     </View>
   );
 };

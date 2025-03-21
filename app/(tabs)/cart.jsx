@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import CustomHeader from "../components/CustomHeader";
@@ -101,71 +102,91 @@ const CartScreen = () => {
               color: "#002140",
             }}
           >
-            Time to Shop {"\n"} Your Cart is <Text style={{color:"#0D986A"}}>Lonely!</Text>
+            Time to Shop {"\n"} Your Cart is{" "}
+            <Text style={{ color: "#0D986A" }}>Lonely!</Text>
           </Text>
         </View>
       )}
-      <FlatList
-        data={fetchedData?.cart}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item, index }) => (
-          <View
-            style={[
-              styles.card,
-              { backgroundColor: colors[index % colors.length] },
-            ]}
+      {isCartLoading ? (
+        <View style={{ marginTop: "70%", alignItems: "center" }}>
+          <ActivityIndicator size={"large"} color={"black"} />
+          <Text
+            style={{
+              fontSize: 18,
+              marginTop: 5,
+              fontWeight: 600,
+              color: "#002140",
+              marginLeft: 15,
+            }}
           >
-            <Image
-              source={require("@/assets/images/Vector.png")}
-              style={styles.vector}
-            />
-            <Image
-              source={require("@/assets/images/Vector2.png")}
-              style={styles.vector2}
-            />
-            <View style={styles.productContainer}>
-              <Image source={{ uri: item.image }} style={styles.image} />
-              <View style={styles.detailsContainer}>
-                <View>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <Text style={styles.subtitle}>{item.subtitle}</Text>
-                </View>
-                <View style={styles.quantityContainer}>
-                  <TouchableOpacity
-                    disabled={item.quantity === 1}
-                    style={[
-                      styles.quantityButton,
-                      item.quantity === 1 && { opacity: 0.5 },
-                    ]}
-                    onPress={() => handleDecrease(item.productId)}
-                  >
-                    <FontAwesome name="minus" size={18} color="#FFF" />
-                  </TouchableOpacity>
+            Loading...
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={fetchedData?.cart}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item, index }) => (
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: colors[index % colors.length] },
+              ]}
+            >
+              <Image
+                source={require("@/assets/images/Vector.png")}
+                style={styles.vector}
+              />
+              <Image
+                source={require("@/assets/images/Vector2.png")}
+                style={styles.vector2}
+              />
+              <View style={styles.productContainer}>
+                <Image source={{ uri: item.image }} style={styles.image} />
+                <View style={styles.detailsContainer}>
+                  <View>
+                    <Text style={styles.title}>{item.title}</Text>
+                    <Text style={styles.subtitle}>{item.subtitle}</Text>
+                  </View>
+                  <View style={styles.quantityContainer}>
+                    <TouchableOpacity
+                      disabled={item.quantity === 1}
+                      style={[
+                        styles.quantityButton,
+                        item.quantity === 1 && { opacity: 0.5 },
+                      ]}
+                      onPress={() => handleDecrease(item.productId)}
+                    >
+                      <FontAwesome name="minus" size={18} color="#FFF" />
+                    </TouchableOpacity>
 
-                  <Text style={styles.quantityText}>{item.quantity}</Text>
-                  <TouchableOpacity
-                    style={styles.quantityButton}
-                    onPress={() => handleIncrease(item.productId)}
-                  >
-                    <FontAwesome name="plus" size={18} color="#FFF" />
-                  </TouchableOpacity>
+                    <Text style={styles.quantityText}>{item.quantity}</Text>
+                    <TouchableOpacity
+                      style={styles.quantityButton}
+                      onPress={() => handleIncrease(item.productId)}
+                    >
+                      <FontAwesome name="plus" size={18} color="#FFF" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
-              <View style={styles.rightSection}>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => handleRemove(item.productId)}
-                >
-                  <FontAwesome name="trash-o" size={22} color="#FF4D4F" />
-                </TouchableOpacity>
-                <Text style={styles.price}>₹{item.price * item.quantity}</Text>
+                <View style={styles.rightSection}>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleRemove(item.productId)}
+                  >
+                    <FontAwesome name="trash-o" size={22} color="#FF4D4F" />
+                  </TouchableOpacity>
+                  <Text style={styles.price}>
+                    ₹{item.price * item.quantity}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      )}
       {fetchedData?.cart.length > 0 && (
         <View style={{ marginVertical: 10 }}>
           <CustomButton

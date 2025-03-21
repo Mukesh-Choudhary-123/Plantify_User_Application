@@ -26,55 +26,79 @@ const TabLayout = () => {
     };
   }, []);
 
+  // Common style for tab icons
+  const iconContainerStyle = (focused) => ({
+    backgroundColor: focused ? "lightgrey" : "transparent",
+    width: 70,
+    borderRadius: 19,
+    height: 35,
+    alignItems: "center",
+    justifyContent: "center",
+  });
+
   return (
     <View style={{ flex: 1 }}>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
-          // tabBarShowLabel: false,
           tabBarActiveTintColor: "#0D986A",
           tabBarInactiveTintColor: "#808080",
           tabBarStyle: {
             backgroundColor: "#fff",
-            height: 70,
-            display: isKeyboardVisible ? "none" : "flex", 
+            height: 65,
+            display: isKeyboardVisible ? "none" : "flex",
           },
-          tabBarItemStyle: { paddingTop: 10 },
+          tabBarLabelStyle: {
+            fontSize: 16,
+            fontWeight: "600",
+          },
+          tabBarItemStyle: { paddingTop: 7 },
         }}
       >
         <Tab.Screen
           name="home"
           component={Home}
           options={{
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="home" size={size} color={color}/>
+            tabBarIcon: ({ focused, color, size }) => (
+              <View style={iconContainerStyle(focused)}>
+                <FontAwesome name="home" size={30} color={color} />
+              </View>
             ),
           }}
         />
+
         <Tab.Screen
           name="wishlist"
           component={Wishlist}
           options={{
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="heart" size={size} color={color} />
+            tabBarIcon: ({ focused, color, size }) => (
+              <View style={iconContainerStyle(focused)}>
+                <FontAwesome name="heart" size={30} color={color} />
+              </View>
             ),
           }}
         />
+
         <Tab.Screen
           name="cart"
           component={Cart}
           options={{
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="shopping-cart" size={size} color={color} />
+            tabBarIcon: ({ focused, color, size }) => (
+              <View style={iconContainerStyle(focused)}>
+                <FontAwesome name="shopping-cart" size={30} color={color} />
+              </View>
             ),
           }}
         />
+
         <Tab.Screen
           name="profile"
           component={Profile}
           options={{
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="user" size={size} color={color} />
+            tabBarIcon: ({ focused, color, size }) => (
+              <View style={iconContainerStyle(focused)}>
+                <FontAwesome name="user" size={30} color={color} />
+              </View>
             ),
           }}
         />
