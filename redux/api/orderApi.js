@@ -1,16 +1,20 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IP } from "../../constant"; 
+import { IP, SERVER } from "../../constant"; 
 import { cartApi } from "./cartApi"; 
 
 export const orderApi = createApi({
   reducerPath: "orderApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `http://${IP}:8080/api/v1/order`,
+    baseUrl: `${SERVER}/order`,
+        prepareHeaders: (headers) => {
+          headers.set("ngrok-skip-browser-warning", "true");
+          return headers;
+        },
   }),
   tagTypes: ["Order"],
   endpoints: (builder) => ({
     getOrder: builder.query({
-      query: (userId) => `/${userId}`,
+      query: (userId) => `user/${userId}`,
       // Tag this query with the userId so that when a mutation invalidates that tag, it will refetch.
       providesTags: (result, error, userId) => [{ type: "Order", id: userId }],
     }),

@@ -1,10 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IP } from "../../constant"; 
+import { IP, SERVER } from "../../constant"; 
 
 export const wishlistApi = createApi({
   reducerPath: "wishlistApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `http://${IP}:8080/api/v1/wishlist`,
+    baseUrl: `${SERVER}/wishlist`,
+        prepareHeaders: (headers) => {
+          headers.set("ngrok-skip-browser-warning", "true");
+          return headers;
+        },
   }),
   tagTypes: ["Wishlist"],
   endpoints: (builder) => ({

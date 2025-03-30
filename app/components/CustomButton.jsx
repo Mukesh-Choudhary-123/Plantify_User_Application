@@ -6,7 +6,6 @@ const CustomButton = ({ text = "Submit", onPress, backgroundColor = "#0D986A", t
     <TouchableOpacity 
       style={[styles.container, { backgroundColor } , style]} 
       onPress={onPress}
-      
     >
       <Text style={[styles.text, { color:textColor } ]} >{text}</Text>
     </TouchableOpacity>

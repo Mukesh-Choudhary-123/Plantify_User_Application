@@ -22,7 +22,7 @@ const colors = [
   "#F5EDA8",
 ];
 
-const ProductCard = ({ id, title, subtitle, prices, image, bgColor }) => {
+const ProductCard = ({ id, title, subtitle, price, image, bgColor }) => {
   const navigation = useNavigation();
   let [fontsLoaded] = useFonts({
     Philosopher_700Bold,
@@ -48,13 +48,21 @@ const ProductCard = ({ id, title, subtitle, prices, image, bgColor }) => {
         />
         <View>
           <View style={{ flexDirection: "row", gap: 20 }}>
-            <CustomText text={subtitle} style={styles.subtitle} />
+            <Text
+              style={styles.subtitle}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {subtitle}
+            </Text>
             <Image
               source={require("@/assets/images/tagIcon.png")}
               style={styles.tagIcon}
             />
           </View>
-          <Text style={styles.title} numberOfLines={1}>{ title}</Text>
+          <Text style={styles.title} numberOfLines={1}>
+            {title}
+          </Text>
         </View>
         <View>
           <Image source={{ uri: image }} style={styles.image} />
@@ -64,66 +72,66 @@ const ProductCard = ({ id, title, subtitle, prices, image, bgColor }) => {
   );
 };
 
-const CustomSimilarProductList = () => {
-  const products = [
-    {
-      id: 3729819873984234,
-      title: "Aleo Vera",
-      prices: 200,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810277/sfqzlryj35d3qirkrmd9.png",
-    },
-    {
-      id: 3729819873984235,
-      title: "Peace Lily",
-      prices: 300,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810275/vf6t8uxpsieqvmlk6vau.png",
-    },
-    {
-      id: 3729819873984236,
-      title: "Spider Plant",
-      prices: 220,
-      subtitle: "Air Purifier",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/zcwyruubsttbphlcfwhr.png",
-    },
-    {
-      id: 3729819873984237,
-      title: "Money Plant",
-      prices: 180,
-      subtitle: "Indoor Plant",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/y5ne7fz3zcucplxjjblu.png",
-    },
-    {
-      id: 3729819873984238,
-      title: "Jade Plant",
-      prices: 270,
-      subtitle: "Succulent",
-      image:
-        "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810279/c1fuea1c20gw3p7z5jir.png",
-    },
-    // ... add other products as needed
-  ];
+const CustomSimilarProductList = ({ products }) => {
+  // const products = [
+  //   {
+  //     id: 3729819873984234,
+  //     title: "Aleo Vera",
+  //     prices: 200,
+  //     subtitle: "Air Purifier",
+  //     image:
+  //       "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810277/sfqzlryj35d3qirkrmd9.png",
+  //   },
+  //   {
+  //     id: 3729819873984235,
+  //     title: "Peace Lily",
+  //     prices: 300,
+  //     subtitle: "Air Purifier",
+  //     image:
+  //       "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810275/vf6t8uxpsieqvmlk6vau.png",
+  //   },
+  //   {
+  //     id: 3729819873984236,
+  //     title: "Spider Plant",
+  //     prices: 220,
+  //     subtitle: "Air Purifier",
+  //     image:
+  //       "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/zcwyruubsttbphlcfwhr.png",
+  //   },
+  //   {
+  //     id: 3729819873984237,
+  //     title: "Money Plant",
+  //     prices: 180,
+  //     subtitle: "Indoor Plant",
+  //     image:
+  //       "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/y5ne7fz3zcucplxjjblu.png",
+  //   },
+  //   {
+  //     id: 3729819873984238,
+  //     title: "Jade Plant",
+  //     prices: 270,
+  //     subtitle: "Succulent",
+  //     image:
+  //       "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810279/c1fuea1c20gw3p7z5jir.png",
+  //   },
+  //   // ... add other products as needed
+  // ];
   return (
     <FlatList
       data={products}
-      keyExtractor={(item) => item.id.toString()}
+      keyExtractor={(item) => item._id.toString()}
       renderItem={({ item, index }) => (
         <ProductCard
-          id={item.id}
+          id={item._id}
           title={item.title}
           subtitle={item.subtitle}
-          prices={item.prices}
-          image={item.image}
+          prices={item.price}
+          image={item.thumbnail}
           bgColor={colors[index % colors.length]}
         />
       )}
-          horizontal
-          showsHorizontalScrollIndicator={false}
+      horizontal
+      showsHorizontalScrollIndicator={false}
     />
   );
 };
@@ -161,6 +169,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: "#002140",
+    maxWidth: "80%",
     fontWeight: "500",
   },
   title: {
@@ -174,7 +183,7 @@ const styles = StyleSheet.create({
   },
   image: {
     height: 150,
-      width: 130,
-    marginLeft:-10
+    width: 130,
+    marginLeft: -10,
   },
 });

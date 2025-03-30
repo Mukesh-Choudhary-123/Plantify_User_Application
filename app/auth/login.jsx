@@ -77,6 +77,7 @@ const LoginScreen = () => {
         onPress={handleSubmit}
         style={styles.button}
         text={isLoading ? "Logging in..." : "Log In"}
+        
       />
       {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
       <Text style={styles.footertitle}>

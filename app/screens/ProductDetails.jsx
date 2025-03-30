@@ -18,7 +18,7 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import CustomButton from "../components/CustomButton";
-import { useProductDetailsQuery } from "../../redux/api/productApi";
+import { useGetProductsByCategoryQuery, useProductDetailsQuery } from "../../redux/api/productApi";
 import { useSelector } from "react-redux";
 import {
   useAddToWishlistMutation,
@@ -33,6 +33,8 @@ import {
 
 const ProductDetails = ({ route }) => {
   const { productId, cardColor } = route.params;
+  
+  
 
   let [fontsLoaded] = useFonts({
     Philosopher_700Bold,
@@ -43,6 +45,13 @@ const ProductDetails = ({ route }) => {
   const { data, isLoading, isError, isFetching } = useProductDetailsQuery(id);
 
   const userData = useSelector((state) => state.auth.user);
+  
+  // console.log("*($*()@*)($*)@($*)(&%(*$%)(@*$)(@&(*$@(*$57049", data?.product?.category)
+  const category = data?.product?.category;
+
+  const {data :similarProduct , isLoading :isSimilarProductLoading  }= useGetProductsByCategoryQuery(category , {skip: !category} )
+
+  // console.log("similarProduct ",similarProduct?.data)
 
   //**************** WishList *******************//
 
@@ -98,14 +107,14 @@ const ProductDetails = ({ route }) => {
     error: cartError,
   } = useGetCartQuery(userData?.id, { skip: !userData?.id });
 
-  console.log("cartData :- ", cartData);
+  // console.log("cartData :- ", cartData);
 
 
   const cartProductIds = cartData?.cart?.map((item) => item.productId);
   const isProductInCart = cartProductIds?.includes(productId);
   
-  console.log("cartProductIds :- ", cartProductIds);
-  console.log("isProductInCart :- ", isProductInCart);
+  // console.log("cartProductIds :- ", cartProductIds);
+  // console.log("isProductInCart :- ", isProductInCart);
   
   const [
     addToCart,
@@ -408,7 +417,7 @@ const ProductDetails = ({ route }) => {
             </Text>
 
             <View style={{ padding: 10 }}>
-              <CustomSimilarProductList category={product.category} />
+              <CustomSimilarProductList products={similarProduct?.data}/>
             </View>
           </ScrollView>
         </>

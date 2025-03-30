@@ -93,62 +93,6 @@ const ProductCard = ({ id, title, subtitle, prices, image,description, bgColor }
     </TouchableOpacity>
   );
 };
-
-// const ProductList = () => {
- 
-//   const [page, setPage] = useState(1);
-//   const [products, setProducts] = useState([]);
-//   const [isFetching, setIsFetching] = useState(false);
-//   const [hasMore, setHasMore] = useState(true); // Track if more products exist
-
-//   const { data, error, isLoading } = useGetProductsQuery({ page, limit: 5 });
-
-//   useEffect(() => {
-//     if (data?.products) {
-//       setProducts((prevProducts) =>
-//         page === 1 ? data.products : [...prevProducts, ...data.products]
-//       );
-
-//       if (page >= data.totalPages) {
-//         setHasMore(false); // No more pages to fetch
-//       }
-//     }
-//     setIsFetching(false);
-//   }, [data]);
-
-//   const loadMoreProducts = () => {
-//     if (!isFetching && hasMore) {
-//       setIsFetching(true);
-//       setPage((prevPage) => prevPage + 1);
-//     }
-//   };
-
-//   return (
-//     <FlatList
-//       data={products}
-//       keyExtractor={(item) => item.id.toString()}
-//       renderItem={({ item, index }) => (
-//         <ProductCard
-//           id={item.id}
-//           title={item.title}
-//           subtitle={item.subtitle}
-//           prices={item.price}
-//           image={item.thumbnail}
-//           description={item.description}
-//           bgColor={colors[index % colors.length]}
-//         />
-//       )}
-//       onEndReached={loadMoreProducts} // Triggered when user scrolls near the end
-//       onEndReachedThreshold={0.5} // Adjust threshold for earlier fetching
-//       ListFooterComponent={() =>
-//         isFetching ? <ActivityIndicator size="large" color="#000" /> : hasMore ? null : <View>No more products</View>
-//       }
-//       showsVerticalScrollIndicator={false}
-//     />
-//   );
-
-// };
-
 export default ProductCard;
 
 const styles = StyleSheet.create({

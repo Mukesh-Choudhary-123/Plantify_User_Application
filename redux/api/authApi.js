@@ -1,10 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IP } from "../../constant";
+import { IP, SERVER } from "../../constant";
 
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `http://${IP}:8080/api/v1/user`,
+    baseUrl: `${SERVER}/user`,
+    prepareHeaders: (headers) => {
+      headers.set("ngrok-skip-browser-warning", "true");
+      return headers;
+    },
   }),
   endpoints: (builder) => ({
     login: builder.mutation({

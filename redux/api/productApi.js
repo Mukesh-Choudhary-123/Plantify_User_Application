@@ -1,14 +1,17 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IP } from "../../constant"; 
+import { IP, SERVER } from "../../constant"; 
 
 export const productApi = createApi({
   reducerPath: "productApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `http://${IP}:8080/api/v1/product`,
+    baseUrl: `${SERVER}/product`,
+        prepareHeaders: (headers) => {
+          headers.set("ngrok-skip-browser-warning", "true");
+          return headers;
+        },
   }),
   endpoints: (builder) => ({
     getProducts: builder.query({
-      // Accept pagination and filter params: { page, limit, search, category }
       query: ({ page, limit, search = "", category = "" }) => {
         let queryStr = `/?page=${page}&limit=${limit}`;
         if (search) {
@@ -23,7 +26,14 @@ export const productApi = createApi({
     productDetails: builder.query({
       query: (id) => `/${id}`,
     }),
+    getProductsByCategory: builder.query({
+      query: (category ) => ({
+        url: `/category?category=${encodeURIComponent(category)}`,
+        method: "GET",
+      }),
+    })
+    
   }),
 });
 
-export const { useGetProductsQuery, useProductDetailsQuery } = productApi;
+export const { useGetProductsQuery, useProductDetailsQuery ,useGetProductsByCategoryQuery} = productApi;

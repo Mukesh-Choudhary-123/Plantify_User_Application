@@ -1,10 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IP } from "../../constant";
+import { IP, SERVER } from "../../constant";
 
 export const cartApi = createApi({
   reducerPath: "cartApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `http://${IP}:8080/api/v1/cart`,
+    baseUrl: `${SERVER}/cart`,
+        prepareHeaders: (headers) => {
+          headers.set("ngrok-skip-browser-warning", "true");
+          return headers;
+        },
   }),
   tagTypes: ["Cart"],
   endpoints: (builder) => ({
