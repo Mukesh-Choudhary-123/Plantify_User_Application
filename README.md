@@ -8,6 +8,6 @@
 
 ------Install apk in emulator-----
 
-curl -L -o Plantify.apk https://expo.dev/artifacts/eas/owRaZg7AZHnyww6dwcYiqf.apk
+curl -L -o Plantify.apk https://expo.dev/artifacts/eas/vUwU6oNGfZnp936QBJ9EaZ.apk
 
 adb install -r Plantify.apk

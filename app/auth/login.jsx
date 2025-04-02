@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CustomButton from "../components/CustomButton";
 import CustomInput from "../components/CustomInput";
@@ -9,41 +9,58 @@ import {
   useFonts,
   Philosopher_700Bold,
 } from "@expo-google-fonts/philosopher";
-import { useLoginMutation } from "@/redux/api/authApi";
-import { setCredentials } from "@/redux/slices/authSlice";
+import { useLoginMutation } from "../redux/api/authApi";
+import { setCredentials } from "../redux/slices/authSlice";
 import { useDispatch } from "react-redux";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const [email, setEmail] = useState("mukesh123@gmail.com");
-  const [password, setPassword] = useState("Qwert@123");
+  const [email, setEmail] = useState("test123@gmail.com");
+  const [password, setPassword] = useState("Test@123");
   const [errorMsg, setErrorMsg] = useState("");
 
   const [login, { isLoading }] = useLoginMutation();
 
-  const handleSubmit = async () => {
-    if (!email || !password) {
-      setErrorMsg("Please fill in both fields.");
-      return;
-    }
-    try {
-      const userData = await login({ email, password }).unwrap();
-      console.log("User:--------------", JSON.stringify(userData.user, null, 2));
-      console.log("Token :------ ",userData?.token)
-      setEmail("");
-      setPassword("");
-      setErrorMsg("");
-      // dispatch(setCredentials({ user: JSON.stringify(userData.user, null, 2), token: userData.token }));
-      dispatch(setCredentials({ user: userData.user, token: userData.token }));
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-      navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
-    } catch (err) {
-      // navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
-      console.error("Login error:", err);
-      setErrorMsg("Login failed. Please check your credentials.");
-    }
-  };
+const handleSubmit = async () => {
+  if (!email || !password) {
+    setErrorMsg("Please fill in both fields.");
+    return;
+  }
+
+  if (!emailRegex.test(email)) {
+    setErrorMsg("Invalid email format.");
+    return;
+  }
+
+  if (!passwordRegex.test(password)) {
+    setErrorMsg("Password must be at least 8 characters long, contain one uppercase letter, one number, and one special character.");
+    return;
+  }
+
+  try {
+    const userData = await login({ email, password }).unwrap();
+    
+    await AsyncStorage.setItem("userToken", userData.token);
+    await AsyncStorage.setItem("user", JSON.stringify(userData.user));
+
+    setEmail("");
+    setPassword("");
+    setErrorMsg("");
+    dispatch(setCredentials({ user: userData.user, token: userData.token }));
+
+    navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
+  } catch (err) {
+    console.error("Login error:", err);
+    setErrorMsg("Login failed. Please check your credentials.");
+    // Alert.alert("Login Error", "There was an issue logging in. Please try again.");
+  }
+};
+
 
   const handleSignUp = () => {
     navigation.navigate("signup");
@@ -70,14 +87,12 @@ const LoginScreen = () => {
         placeholder="Enter email"
         value={email}
         onChangeText={setEmail}
-        // error={errorMsg}
       />
       <CustomPasswordInput value={password} onChangeText={setPassword} />
       <CustomButton
         onPress={handleSubmit}
         style={styles.button}
         text={isLoading ? "Logging in..." : "Log In"}
-        
       />
       {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
       <Text style={styles.footertitle}>

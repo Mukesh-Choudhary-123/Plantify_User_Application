@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IP, SERVER } from "../../constant"; 
+import { IP, SERVER } from "../../../constant"; 
 
 export const productApi = createApi({
   reducerPath: "productApi",

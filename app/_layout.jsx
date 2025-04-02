@@ -8,22 +8,22 @@ import AuthLayout from "./auth/_layout";
 import TabLayout from "./(tabs)/_layout";
 import NotFoundScreen from "./+not-found";
 import ProductDetails from "./screens/ProductDetails";
-import PlaceOrder from './screens/PlaceOrder';
+import PlaceOrder from "./screens/PlaceOrder";
 import { Provider, useSelector } from "react-redux";
-import { store } from "../redux/store";
+import { store } from "./redux/store";
 import "../global.css";
-import { AppRegistry } from 'react-native';
-import { name as appName } from '../app.json';
+import { AppRegistry } from "react-native";
+import { name as appName } from "../app.json";
+import AppInitializer from "./utils/AppInitializer";
 
 AppRegistry.registerComponent(appName, () => App);
-
 
 const Stack = createStackNavigator();
 
 const RootNavigator = () => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-  console.log("Login Screen isAuthenticated :- ", isAuthenticated);
+  console.log("Login Screen isAuthenticated: ", isAuthenticated);
 
   return (
     <Stack.Navigator
@@ -46,7 +46,9 @@ const RootNavigator = () => {
 const RootLayout = () => {
   return (
     <Provider store={store}>
-      <RootNavigator />
+      <AppInitializer>
+        <RootNavigator />
+      </AppInitializer>
     </Provider>
   );
 };

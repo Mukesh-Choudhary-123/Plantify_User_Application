@@ -12,17 +12,16 @@ import React from "react";
 import CustomHeader from "../components/CustomHeader";
 import { useFonts, Philosopher_700Bold } from "@expo-google-fonts/philosopher";
 import { useDispatch, useSelector } from "react-redux";
-import { useLogoutMutation } from "../../redux/api/authApi";
+import { useLogoutMutation } from "../redux/api/authApi";
 import { useNavigation } from "@react-navigation/native";
-import { logout } from "../../redux/slices/authSlice";
-import { useGetOrderQuery } from "../../redux/api/orderApi";
+import { logout } from "../redux/slices/authSlice";
+import { useGetOrderQuery } from "../redux/api/orderApi";
 import LottieView from "lottie-react-native";
 import EmptyCart from "../../assets/animation/EmptyCart.json";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const { width, height } = Dimensions.get("window");
 
-
 const orderSteps = ["order", "shipped", "delivered"];
-
 const ProfileScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -41,22 +40,34 @@ const ProfileScreen = () => {
     error: orderError,
   } = useGetOrderQuery(userId, { skip: !userData?.id });
 
-  // Use orders as an array (default to an empty array if undefined)
+  // Our orders data now is an array of order groups
   const orders = fetchOrder?.orders || [];
 
-  // console.log("fetchOrder :- ", orders);
+  console.log(JSON.stringify(orders, null, 2));
 
   const handleLogout = async () => {
     try {
       await triggerLogout().unwrap();
+
+      // Remove credentials from AsyncStorage
+      await AsyncStorage.removeItem("userToken");
+      await AsyncStorage.removeItem("user");
+
+      // Dispatch logout action to update Redux state
       dispatch(logout());
+
+      // Reset navigation to the auth screen
       navigation.reset({ index: 0, routes: [{ name: "auth" }] });
     } catch (err) {
       console.error("Logout failed:", err);
     }
   };
 
-  const renderOrderItem = ({ item, index }) => {
+  // Define the order steps for progress visualization
+  const orderSteps = ["order", "shipped", "delivered"];
+
+  // Render each order group
+  const renderOrderGroup = ({ item: orderGroup, index: groupIndex }) => {
     // Colors for different order cards
     const colors = [
       "#9CE5CB",
@@ -68,92 +79,130 @@ const ProfileScreen = () => {
       "#F5EDA8",
     ];
 
-    // Configuration for status badges
-    const statusConfig = {
-      order: { color: "#FFB800", label: "Processing" },
-      shipped: { color: "#0D986A", label: "Shipped" },
-      delivered: { color: "#2E7D32", label: "Delivered" },
-      cancelled: { color: "#D32F2F", label: "Cancelled" },
-    };
-
-    // Map "pending" to "order"
-    const mappedStatus =
-      item.status && item.status.toLowerCase() === "pending"
-        ? "order"
-        : item.status
-        ? item.status.toLowerCase()
-        : "order";
-
-    const config = statusConfig[mappedStatus] || {
-      color: "#000",
-      label: "Unknown",
-    };
-    const { color, label } = config;
-    const currentStepIndex = orderSteps.indexOf(mappedStatus);
-
     return (
       <View
-        style={[
-          styles.orderCard,
-          { backgroundColor: colors[index % colors.length] },
-        ]}
+        key={orderGroup.orderId}
+        style={{
+          marginBottom: 20,
+          backgroundColor: "#e4ede6",
+          borderRadius: 16,
+          paddingHorizontal: 10,
+        }}
       >
-        <Image
-          source={require("@/assets/images/Vector.png")}
-          style={styles.vector}
-        />
-        <Image
-          source={require("@/assets/images/Vector2.png")}
-          style={styles.vector2}
-        />
-        <Image source={{ uri: item.image }} style={styles.orderImage} />
-        <View style={styles.orderDetails}>
-          <View style={styles.orderHeader}>
-            <Text style={styles.orderTitle}>{item.title}</Text>
-            <View style={[styles.statusBadge, { backgroundColor: color }]}>
-              <Text style={styles.statusText}>{label}</Text>
-            </View>
-          </View>
-          <Text style={styles.orderSubtitle}>{item.subtitle}</Text>
-          <View style={styles.orderFooter}>
-            <Text style={styles.orderPrice}>₹{item.prices}</Text>
-            <Text style={styles.orderId}>
-              #{item.id ? item.id.toString().slice(-6) : "N/A"}
-            </Text>
-          </View>
-          {/* New block for totalAmount and totalItems */}
-          <View style={styles.totalsContainer}>
-            <Text style={styles.totalText}>
-              Total Amount: ₹{item.totalAmount}
-            </Text>
-            <Text style={styles.totalText}>Total Items: {item.totalItems}</Text>
-          </View>
-          {item.status !== "cancelled" && (
-            <View style={styles.progressContainer}>
-              {orderSteps.map((step, idx) => (
-                <View key={step} style={styles.stepContainer}>
-                  <View
-                    style={[
-                      styles.stepIcon,
-                      idx <= currentStepIndex && { backgroundColor: "#0D986A" },
-                    ]}
-                  >
-                    <Text style={styles.stepText}>
-                      {idx <= currentStepIndex ? "✓" : idx + 1}
+        <View style={{ marginTop: 10 }}></View>
+        {orderGroup.items.map((orderItem, idx) => {
+          // Configuration for status badges
+          const statusConfig = {
+            order: { color: "#FFB800", label: "Processing" },
+            shipped: { color: "#0D986A", label: "Shipped" },
+            delivered: { color: "#2E7D32", label: "Delivered" },
+            cancelled: { color: "#D32F2F", label: "Cancelled" },
+          };
+
+          // Map "pending" to "order"
+          const mappedStatus =
+            orderItem.status && orderItem.status.toLowerCase() === "pending"
+              ? "order"
+              : orderItem.status
+              ? orderItem.status.toLowerCase()
+              : "order";
+
+          const config = statusConfig[mappedStatus] || {
+            color: "#000",
+            label: "Unknown",
+          };
+          const { color, label } = config;
+          const currentStepIndex = orderSteps.indexOf(mappedStatus);
+
+          return (
+            <View
+              key={orderItem.id}
+              style={[
+                styles.orderCard,
+                { backgroundColor: colors[idx % colors.length] },
+              ]}
+            >
+              <Image
+                source={require("@/assets/images/Vector.png")}
+                style={styles.vector}
+              />
+              <Image
+                source={require("@/assets/images/Vector2.png")}
+                style={styles.vector2}
+              />
+              <View style={styles.orderDetails}>
+                <View style={{ flexDirection: "row" }}>
+                  <Image
+                    source={{ uri: orderItem.image }}
+                    style={styles.orderImage}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.orderHeader}>
+                      <Text style={styles.orderTitle}>{orderItem.title}</Text>
+                      <View
+                        style={[styles.statusBadge, { backgroundColor: color }]}
+                      >
+                        <Text style={styles.statusText}>{label}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.orderSubtitle}>
+                      {orderItem.subtitle}
                     </Text>
+                    <View style={styles.orderFooter}>
+                      <Text style={styles.orderPrice}>₹{orderItem.prices}</Text>
+                      <Text style={styles.totalText}>
+                        Quantity: {orderItem.quantity}
+                      </Text>
+                    </View>
                   </View>
-                  <Text
-                    style={[
-                      styles.stepLabel,
-                      idx <= currentStepIndex && { color: "#0D986A" },
-                    ]}
-                  >
-                    {step}
-                  </Text>
                 </View>
-              ))}
+                <View>
+                  {orderItem.status !== "cancelled" && (
+                    <View style={styles.progressContainer}>
+                      {orderSteps.map((step, idx) => (
+                        <View key={step} style={styles.stepContainer}>
+                          <View
+                            style={[
+                              styles.stepIcon,
+                              idx <= currentStepIndex && {
+                                backgroundColor: "#0D986A",
+                              },
+                            ]}
+                          >
+                            <Text style={styles.stepText}>
+                              {idx <= currentStepIndex ? "✓" : idx + 1}
+                            </Text>
+                          </View>
+                          <Text
+                            style={[
+                              styles.stepLabel,
+                              idx <= currentStepIndex && { color: "#0D986A" },
+                            ]}
+                          >
+                            {step}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              </View>
             </View>
-          )}
+          );
+        })}
+        <View style={{ marginBottom: 10, marginHorizontal:10 }}>
+
+          <Text style={{ fontSize: 17, fontWeight: 500 }}>
+            Your Order ID <Text style={{color:"grey"}}>#{orderGroup.orderId.slice(-6)}</Text>
+          </Text>
+          <View style={{flexDirection:"row" , justifyContent:"space-between" ,marginTop:5}}>
+          <Text style={{ fontSize: 17, fontWeight: 500 ,color:"#0D986A"}}>
+            Total Amount: <Text style={{color:"#002140"}}>{orderGroup.totalAmount} Rs</Text>
+          </Text>
+          <Text style={{ fontSize: 17, fontWeight: 500 , color:"#0D986A"}}>
+            Total Item: <Text style={{color:"#002140"}}>{orderGroup.totalItems}</Text>
+          </Text>
+          </View>
         </View>
       </View>
     );
@@ -177,23 +226,6 @@ const ProfileScreen = () => {
         </View>
       </View>
       <View style={styles.contentContainer}>
-        {/* {orders.length === 0 && (
-                <View style={{ width: "100%", height: "100%", alignItems: "center" ,marginTop:-48}}>
-                  <LottieView source={EmptyCart} autoPlay loop style={styles.lottie} />
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      textAlign: "center",
-                      marginTop: -50,
-                      fontWeight: 600,
-                      color: "#002140",
-                    }}
-                  >
-                    No problem {"\n"} Start shopping <Text style={{color:"#0D986A"}}>Now!</Text>
-                  </Text>
-                </View>
-              )} */}
-
         {isOrderLoading ? (
           <View style={{ marginTop: "70%", alignItems: "center" }}>
             <ActivityIndicator size={"large"} color={"black"} />
@@ -201,9 +233,9 @@ const ProfileScreen = () => {
               style={{
                 fontSize: 18,
                 marginTop: 5,
-                fontWeight: 600,
+                fontWeight: "600",
                 color: "#002140",
-                marginLeft:15
+                marginLeft: 15,
               }}
             >
               Loading...
@@ -212,10 +244,8 @@ const ProfileScreen = () => {
         ) : (
           <FlatList
             data={orders}
-            keyExtractor={(item) =>
-              item.id ? item.id.toString() : Math.random().toString()
-            }
-            renderItem={renderOrderItem}
+            keyExtractor={(order) => order.orderId}
+            renderItem={renderOrderGroup}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.ordersList}
             ListEmptyComponent={
@@ -238,7 +268,7 @@ const ProfileScreen = () => {
                     fontSize: 20,
                     textAlign: "center",
                     marginTop: -50,
-                    fontWeight: 600,
+                    fontWeight: "600",
                     color: "#002140",
                   }}
                 >
@@ -336,7 +366,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 16,
     padding: 16,
-    flexDirection: "row",
+    // flexDirection: "row",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -365,6 +395,7 @@ const styles = StyleSheet.create({
   },
   orderDetails: {
     flex: 1,
+    // flexDirection:"row"
   },
   orderHeader: {
     flexDirection: "row",

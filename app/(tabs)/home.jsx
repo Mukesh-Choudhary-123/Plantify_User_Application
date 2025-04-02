@@ -18,7 +18,7 @@ import {
   Philosopher_700Bold,
 } from "@expo-google-fonts/philosopher";
 import { FontAwesome } from "@expo/vector-icons";
-import { useGetProductsQuery } from "../../redux/api/productApi";
+import { useGetProductsQuery } from "../redux/api/productApi";
 import ProductCard from "../components/CustomProductList";
 
 const OPTION_WIDTH = 100;
@@ -66,9 +66,9 @@ const HomeScreen = () => {
     category: selectedOption,
   });
 
-  console.log("Page:", page);
-  console.log("Category:", selectedOption);
-  console.log("Search:", search);
+  // console.log("Page:", page);
+  // console.log("Category:", selectedOption);
+  // console.log("Search:", search);
 
   // Reset pagination and products when filter or search changes
   useEffect(() => {

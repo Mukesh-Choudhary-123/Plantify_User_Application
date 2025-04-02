@@ -12,7 +12,7 @@ import React, { useEffect, useState } from "react";
 import CustomText from "./CustomText";
 import { useFonts, Philosopher_700Bold } from "@expo-google-fonts/philosopher";
 import { useNavigation } from "@react-navigation/native";
-import { useGetProductsQuery } from "../../redux/api/productApi";
+import { useGetProductsQuery } from "../redux/api/productApi";
 const colors = [
   "#9CE5CB",
   "#FDC7BE",

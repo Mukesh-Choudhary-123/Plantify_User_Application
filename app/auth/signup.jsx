@@ -12,7 +12,7 @@ import {
   Philosopher_700Bold,
   Philosopher_700Bold_Italic,
 } from "@expo-google-fonts/philosopher";
-import { useSignupMutation } from "@/redux/api/authApi";
+import { useSignupMutation } from "../redux/api/authApi";
 
 const SignupScreen = () => {
   const navigation = useNavigation();
@@ -24,29 +24,44 @@ const SignupScreen = () => {
   const [errorMsg, setErrorMsg] = useState("");
 
   const [signup, { isLoading }] = useSignupMutation();
-
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  
   const handleSubmit = async () => {
     // Validate fields
     if (!username || !email || !password || !confirmPassword) {
       setErrorMsg("All fields are required.");
       return;
     }
-
+  
+    if (!emailRegex.test(email)) {
+      setErrorMsg("Invalid email format.");
+      return;
+    }
+  
+    if (!passwordRegex.test(password)) {
+      setErrorMsg(
+        "Password must be at least 8 characters long, contain one uppercase letter, one number, and one special character."
+      );
+      return;
+    }
+  
     if (password !== confirmPassword) {
       setErrorMsg("Passwords do not match.");
       return;
     }
-
+  
     try {
       // Call the signup endpoint with provided credentials
       const userData = await signup({ username, email, password }).unwrap();
-      console.log("Signup successful:", userData);
+      
       // Clear input fields and error message
       setUsername("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setErrorMsg("");
+  
       // Navigate to login screen (or another screen if desired)
       navigation.navigate("login");
     } catch (error) {
@@ -54,6 +69,7 @@ const SignupScreen = () => {
       setErrorMsg(error.data?.message || "Signup failed. Please try again.");
     }
   };
+  
 
   const handleLogin = () => {
     navigation.navigate("login");

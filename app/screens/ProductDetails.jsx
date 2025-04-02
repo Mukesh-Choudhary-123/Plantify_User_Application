@@ -18,18 +18,18 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import CustomButton from "../components/CustomButton";
-import { useGetProductsByCategoryQuery, useProductDetailsQuery } from "../../redux/api/productApi";
+import { useGetProductsByCategoryQuery, useProductDetailsQuery } from "../redux/api/productApi";
 import { useSelector } from "react-redux";
 import {
   useAddToWishlistMutation,
   useGetWishlistQuery,
   useRemoveFromWishlistMutation,
-} from "../../redux/api/wishlistApi";
+} from "../redux/api/wishlistApi";
 import {
   useAddToCartMutation,
   useGetCartQuery,
   useRemoveFromCartMutation,
-} from "../../redux/api/cartApi";
+} from "../redux/api/cartApi";
 
 const ProductDetails = ({ route }) => {
   const { productId, cardColor } = route.params;
@@ -41,7 +41,7 @@ const ProductDetails = ({ route }) => {
   });
 
   const id = productId;
-  console.log("product-ID -**-", id);
+  // console.log("product-ID -**-", id);
   const { data, isLoading, isError, isFetching } = useProductDetailsQuery(id);
 
   const userData = useSelector((state) => state.auth.user);

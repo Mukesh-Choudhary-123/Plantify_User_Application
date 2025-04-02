@@ -16,7 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import CustomHeader from "../components/CustomHeader";
 import { FontAwesome } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
-import { useGetWishlistQuery } from "../../redux/api/wishlistApi";
+import { useGetWishlistQuery } from "../redux/api/wishlistApi";
 import LottieView from "lottie-react-native";
 import EmptyCart from "../../assets/animation/EmptyCart.json";
 const { width, height } = Dimensions.get("window");
@@ -89,7 +89,7 @@ const WishlistScreen = () => {
     error,
   } = useGetWishlistQuery(userData?.id, { skip: !userData?.id });
 
-  console.log("wishlistData : ", wishlistData?.wishlist);
+  // console.log("wishlistData : ", wishlistData?.wishlist);
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>

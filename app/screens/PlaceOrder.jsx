@@ -14,10 +14,10 @@ import { useFonts, Philosopher_700Bold } from "@expo-google-fonts/philosopher";
 import CustomButton from "../components/CustomButton";
 import CustomInput from "../components/CustomInput";
 import { useDispatch, useSelector } from "react-redux";
-import { useGetCartQuery } from "../../redux/api/cartApi";
-import { useUserUpdateMutation } from "../../redux/api/authApi";
-import { setAddress } from "../../redux/slices/authSlice";
-import { useCreateOrderMutation } from "../../redux/api/orderApi";
+import { useGetCartQuery } from "../redux/api/cartApi";
+import { useUserUpdateMutation } from "../redux/api/authApi";
+import { setAddress } from "../redux/slices/authSlice";
+import { useCreateOrderMutation } from "../redux/api/orderApi";
 import { useNavigation } from "@react-navigation/native";
 
 const colors = [
@@ -173,12 +173,12 @@ const PlaceOrder = () => {
     0
   );
   const deliveryFee = 60;
-  const total = subtotal + deliveryFee;
+  const total = subtotal;
   const handlePlaceOrder = () => {
     const id = userData?.id;
     const items = fetchedData.cart;
     const shippingAddress = userData?.address[0];
-    console.log("Click handlePlaceOrder");
+    // console.log("Click handlePlaceOrder");
     placeOrder({ id, items, shippingAddress })
       .unwrap()
       .then()
@@ -339,25 +339,27 @@ const PlaceOrder = () => {
       </ScrollView>
 
       {/* Footer Card */}
-      <View style={styles.totalsCard}>
-        <View style={styles.totalRow}>
+      {!isEditing &&
+        <View style={styles.totalsCard}>
+          {/* <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Subtotal:</Text>
           <Text style={styles.totalValue}>₹{subtotal}</Text>
-        </View>
-        <View style={styles.totalRow}>
+        </View> */}
+          {/* <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Delivery:</Text>
           <Text style={styles.totalValue}>+ ₹{deliveryFee}</Text>
+        </View> */}
+          <View style={[styles.totalRow, { marginTop: 8 }]}>
+            <Text style={styles.grandTotal}>Total Amount:</Text>
+            <Text style={styles.grandTotal}>₹{total}</Text>
+          </View>
+          <CustomButton
+            text="Order Confirm"
+            style={{ marginTop: 10 }}
+            onPress={handlePlaceOrder}
+          />
         </View>
-        <View style={[styles.totalRow, { marginTop: 8 }]}>
-          <Text style={styles.grandTotal}>Total:</Text>
-          <Text style={styles.grandTotal}>₹{total}</Text>
-        </View>
-        <CustomButton
-          text="Order Confirm"
-          style={{ marginTop: 10 }}
-          onPress={handlePlaceOrder}
-        />
-      </View>
+      }
     </View>
   );
 };

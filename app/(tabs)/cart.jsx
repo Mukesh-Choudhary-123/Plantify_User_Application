@@ -18,7 +18,7 @@ import {
   useGetCartQuery,
   useRemoveFromCartMutation,
   useUpdateToCartMutation,
-} from "../../redux/api/cartApi";
+} from "../redux/api/cartApi";
 import { useSelector } from "react-redux";
 import LottieView from "lottie-react-native";
 import EmptyCart from "../../assets/animation/EmptyCart.json";
