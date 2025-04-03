@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Plantify",
-    "slug": "Plantify",
+    "slug": "plantify2",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/Plantify.png",
@@ -44,7 +44,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "bec032db-cbbf-4cd2-af95-6cbc9df7a526"
+        "projectId": "829f9f73-9a61-4662-b9d6-d71dd161af4a"
       }
     }
   }

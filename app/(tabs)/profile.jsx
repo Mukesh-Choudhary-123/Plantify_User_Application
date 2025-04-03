@@ -70,13 +70,13 @@ const ProfileScreen = () => {
   const renderOrderGroup = ({ item: orderGroup, index: groupIndex }) => {
     // Colors for different order cards
     const colors = [
+      "#56D1A7",
+      "#DEEC8A",
+      "#F5EDA8",
+      "#B2E28D",
       "#9CE5CB",
       "#FDC7BE",
       "#FFE899",
-      "#56D1A7",
-      "#B2E28D",
-      "#DEEC8A",
-      "#F5EDA8",
     ];
 
     return (
@@ -84,7 +84,7 @@ const ProfileScreen = () => {
         key={orderGroup.orderId}
         style={{
           marginBottom: 20,
-          backgroundColor: "#e4ede6",
+          backgroundColor: "#fff",
           borderRadius: 16,
           paddingHorizontal: 10,
         }}
@@ -292,7 +292,7 @@ export default ProfileScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
+    // backgroundColor: "#F8FAFC",
   },
   lottie: {
     alignSelf: "center",
