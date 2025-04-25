@@ -35,7 +35,7 @@ const ProductCard = ({ id, title, subtitle, prices, image,description, bgColor }
       cardColor: bgColor,
     });
   };
-  function truncateDescription(text, wordsPerLine = 4, maxLines = 2) {
+  function truncateDescription(text, wordsPerLine = 3, maxLines = 2) {
     if (!text) return "";
     const words = text.split(" ");
     let result = "";
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
   container: {
-    marginTop: 20,
+    marginTop: 10,
     height: 200,
     marginHorizontal: 10,
     borderRadius: 16,

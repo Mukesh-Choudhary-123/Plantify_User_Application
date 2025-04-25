@@ -73,49 +73,6 @@ const ProductCard = ({ id, title, subtitle, price, image, bgColor }) => {
 };
 
 const CustomSimilarProductList = ({ products }) => {
-  // const products = [
-  //   {
-  //     id: 3729819873984234,
-  //     title: "Aleo Vera",
-  //     prices: 200,
-  //     subtitle: "Air Purifier",
-  //     image:
-  //       "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810277/sfqzlryj35d3qirkrmd9.png",
-  //   },
-  //   {
-  //     id: 3729819873984235,
-  //     title: "Peace Lily",
-  //     prices: 300,
-  //     subtitle: "Air Purifier",
-  //     image:
-  //       "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810275/vf6t8uxpsieqvmlk6vau.png",
-  //   },
-  //   {
-  //     id: 3729819873984236,
-  //     title: "Spider Plant",
-  //     prices: 220,
-  //     subtitle: "Air Purifier",
-  //     image:
-  //       "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/zcwyruubsttbphlcfwhr.png",
-  //   },
-  //   {
-  //     id: 3729819873984237,
-  //     title: "Money Plant",
-  //     prices: 180,
-  //     subtitle: "Indoor Plant",
-  //     image:
-  //       "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810278/y5ne7fz3zcucplxjjblu.png",
-  //   },
-  //   {
-  //     id: 3729819873984238,
-  //     title: "Jade Plant",
-  //     prices: 270,
-  //     subtitle: "Succulent",
-  //     image:
-  //       "https://res.cloudinary.com/dyws4bybf/image/upload/c_thumb,w_200,g_face/v1740810279/c1fuea1c20gw3p7z5jir.png",
-  //   },
-  //   // ... add other products as needed
-  // ];
   return (
     <FlatList
       data={products}
@@ -145,6 +102,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     borderRadius: 16,
     padding: 20,
+    marginBottom:5,
     flexDirection: "column",
     overflow: "hidden",
     shadowColor: "#000",

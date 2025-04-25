@@ -15,6 +15,7 @@ import "../global.css";
 import { AppRegistry } from "react-native";
 import { name as appName } from "../app.json";
 import AppInitializer from "./utils/AppInitializer";
+import NetworkChecker from "./utils/NetworkChecker";
 
 AppRegistry.registerComponent(appName, () => App);
 
@@ -36,7 +37,13 @@ const RootNavigator = () => {
     >
       <Stack.Screen name="auth" component={AuthLayout} />
       <Stack.Screen name="tabs" component={TabLayout} />
-      <Stack.Screen name="ProductDetails" component={ProductDetails} />
+      <Stack.Screen
+        name="ProductDetails"
+        component={ProductDetails}
+        options={{
+          gestureEnabled: false,
+        }}
+      />
       <Stack.Screen name="PlaceOrder" component={PlaceOrder} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} />
     </Stack.Navigator>
@@ -45,11 +52,13 @@ const RootNavigator = () => {
 
 const RootLayout = () => {
   return (
-    <Provider store={store}>
-      <AppInitializer>
-        <RootNavigator />
-      </AppInitializer>
-    </Provider>
+    <NetworkChecker>
+      <Provider store={store}>
+        <AppInitializer>
+          <RootNavigator />
+        </AppInitializer>
+      </Provider>
+    </NetworkChecker>
   );
 };
 

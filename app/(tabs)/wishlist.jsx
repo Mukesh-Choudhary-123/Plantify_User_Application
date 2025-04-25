@@ -127,7 +127,7 @@ const WishlistScreen = () => {
           </Text>
         </View>
       ) : (
-        <View style={{ paddingHorizontal: 10, paddingBottom: 70 }}>
+        <View style={{ paddingHorizontal: 10,marginBottom:60 }}>
           <FlatList
             data={wishlistData?.wishlist}
             keyExtractor={(item) => item._id.toString()}
@@ -155,7 +155,8 @@ export default WishlistScreen;
 const styles = StyleSheet.create({
   container: {
     height: 215,
-    width: 180,
+    // width: 180,
+    width: width *0.42,
     marginHorizontal: 5,
     borderRadius: 16,
     padding: 20,

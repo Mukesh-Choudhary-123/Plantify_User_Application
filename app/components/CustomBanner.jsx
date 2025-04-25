@@ -46,10 +46,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#E8FDE7",
     flexDirection: "row",
     borderRadius: 16,
+
     paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "space-between",
-    marginHorizontal:10
+    // marginHorizontal:10
   },
   textContainer: {
     flex: 1,

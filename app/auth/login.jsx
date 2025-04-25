@@ -5,10 +5,7 @@ import CustomButton from "../components/CustomButton";
 import CustomInput from "../components/CustomInput";
 import CustomText from "../components/CustomText";
 import CustomPasswordInput from "../components/CustomPasswordInput";
-import {
-  useFonts,
-  Philosopher_700Bold,
-} from "@expo-google-fonts/philosopher";
+import { useFonts, Philosopher_700Bold } from "@expo-google-fonts/philosopher";
 import { useLoginMutation } from "../redux/api/authApi";
 import { setCredentials } from "../redux/slices/authSlice";
 import { useDispatch } from "react-redux";
@@ -24,43 +21,45 @@ const LoginScreen = () => {
   const [login, { isLoading }] = useLoginMutation();
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  const passwordRegex =
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-const handleSubmit = async () => {
-  if (!email || !password) {
-    setErrorMsg("Please fill in both fields.");
-    return;
-  }
+  const handleSubmit = async () => {
+    if (!email || !password) {
+      setErrorMsg("Please fill in both fields.");
+      return;
+    }
 
-  if (!emailRegex.test(email)) {
-    setErrorMsg("Invalid email format.");
-    return;
-  }
+    if (!emailRegex.test(email)) {
+      setErrorMsg("Invalid email format.");
+      return;
+    }
 
-  if (!passwordRegex.test(password)) {
-    setErrorMsg("Password must be at least 8 characters long, contain one uppercase letter, one number, and one special character.");
-    return;
-  }
+    if (!passwordRegex.test(password)) {
+      setErrorMsg(
+        "Password must be at least 8 characters long, contain one uppercase letter, one number, and one special character."
+      );
+      return;
+    }
 
-  try {
-    const userData = await login({ email, password }).unwrap();
-    
-    await AsyncStorage.setItem("userToken", userData.token);
-    await AsyncStorage.setItem("user", JSON.stringify(userData.user));
+    try {
+      const userData = await login({ email, password }).unwrap();
 
-    setEmail("");
-    setPassword("");
-    setErrorMsg("");
-    dispatch(setCredentials({ user: userData.user, token: userData.token }));
+      await AsyncStorage.setItem("userToken", userData.token);
+      await AsyncStorage.setItem("user", JSON.stringify(userData.user));
 
-    navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
-  } catch (err) {
-    console.error("Login error:", err);
-    setErrorMsg("Login failed. Please check your credentials.");
-    // Alert.alert("Login Error", "There was an issue logging in. Please try again.");
-  }
-};
+      setEmail("");
+      setPassword("");
+      setErrorMsg("");
+      dispatch(setCredentials({ user: userData.user, token: userData.token }));
 
+      navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
+    } catch (err) {
+      console.error("Login error:", err);
+      setErrorMsg("Login failed. Please check your credentials.");
+      // Alert.alert("Login Error", "There was an issue logging in. Please try again.");
+    }
+  };
 
   const handleSignUp = () => {
     navigation.navigate("signup");
@@ -93,6 +92,7 @@ const handleSubmit = async () => {
         onPress={handleSubmit}
         style={styles.button}
         text={isLoading ? "Logging in..." : "Log In"}
+        disabled={isLoading ? true : false}
       />
       {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
       <Text style={styles.footertitle}>

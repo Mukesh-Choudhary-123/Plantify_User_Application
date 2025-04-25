@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import React from "react";
 import CustomHeader from "../components/CustomHeader";
@@ -209,6 +210,8 @@ const ProfileScreen = () => {
   };
 
   return (
+    <>
+      {/* <StatusBar backgroundColor={"#56D1A7"}/> */}
     <View style={styles.container}>
       <View style={styles.profileHeader}>
         <CustomHeader color="#56D1A7" />
@@ -283,7 +286,8 @@ const ProfileScreen = () => {
           />
         )}
       </View>
-    </View>
+      </View>
+      </>
   );
 };
 
@@ -309,6 +313,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 8,
+    zIndex:50
   },
   profileContent: {},
   avatarContainer: {

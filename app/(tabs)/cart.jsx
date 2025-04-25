@@ -7,6 +7,7 @@ import {
   FlatList,
   Dimensions,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import CustomHeader from "../components/CustomHeader";
@@ -79,7 +80,23 @@ const CartScreen = () => {
   ] = useRemoveFromCartMutation();
 
   const handleRemove = (productId) => {
-    removeFromCart({ id: userId, productId });
+    Alert.alert(
+      "Remove Plant",
+      "Are you sure you want to remove this plant from your cart?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: () => {
+            removeFromCart({ id: userId, productId });
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const handlePlaceOrder = () => {
@@ -150,7 +167,7 @@ const CartScreen = () => {
                     <Text style={styles.title}>{item.title}</Text>
                     <Text style={styles.subtitle}>{item.subtitle}</Text>
                   </View>
-                  <View style={styles.quantityContainer}>
+                  {/* <View style={styles.quantityContainer}>
                     <TouchableOpacity
                       disabled={item.quantity === 1}
                       style={[
@@ -165,6 +182,47 @@ const CartScreen = () => {
                     <Text style={styles.quantityText}>{item.quantity}</Text>
                     <TouchableOpacity
                       style={styles.quantityButton}
+                      onPress={() => handleIncrease(item.productId)}
+                    >
+                      <FontAwesome name="plus" size={18} color="#FFF" />
+                    </TouchableOpacity>
+                  </View> */}
+                  <View style={styles.quantityContainer}>
+                    <TouchableOpacity
+                      disabled={
+                        isCartLoading ||
+                        isUpdateToCartLoading ||
+                        item.quantity === 1
+                      }
+                      style={[
+                        styles.quantityButton,
+                        item.quantity === 1 ||
+                        isCartLoading ||
+                        isUpdateToCartLoading
+                          ? { opacity: 0.5 }
+                          : {},
+                      ]}
+                      onPress={() => handleDecrease(item.productId)}
+                    >
+                      <FontAwesome name="minus" size={18} color="#FFF" />
+                    </TouchableOpacity>
+
+                    <View>
+                      {isCartLoading || isUpdateToCartLoading ? (
+                        <ActivityIndicator size="small" color="#FFF" />
+                      ) : (
+                        <Text style={styles.quantityText}>{item.quantity}</Text>
+                      )}
+                    </View>
+
+                    <TouchableOpacity
+                      disabled={isCartLoading || isUpdateToCartLoading}
+                      style={[
+                        styles.quantityButton,
+                        isCartLoading || isUpdateToCartLoading
+                          ? { opacity: 0.5 }
+                          : {},
+                      ]}
                       onPress={() => handleIncrease(item.productId)}
                     >
                       <FontAwesome name="plus" size={18} color="#FFF" />

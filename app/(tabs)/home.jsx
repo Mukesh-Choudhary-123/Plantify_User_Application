@@ -1,15 +1,16 @@
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Image,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
 import CustomBanner from "../components/CustomBanner";
 import CustomHeader from "../components/CustomHeader";
 import {
@@ -22,6 +23,7 @@ import { useGetProductsQuery } from "../redux/api/productApi";
 import ProductCard from "../components/CustomProductList";
 
 const OPTION_WIDTH = 100;
+
 const HomeScreen = () => {
   let [fontsLoaded] = useFonts({
     Philosopher_400Regular,
@@ -51,36 +53,43 @@ const HomeScreen = () => {
   ];
 
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
   const [products, setProducts] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
+  const filterListRef = useRef(null);
   const onEndReachedCalledDuringMomentum = useRef(true);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const { data, error, isLoading } = useGetProductsQuery({
     page,
     limit: 5,
-    search: search,
+    search: searchQuery,
     category: selectedOption,
   });
 
-  // console.log("Page:", page);
-  // console.log("Category:", selectedOption);
-  // console.log("Search:", search);
-
-  // Reset pagination and products when filter or search changes
+  // Reset on query or filter change
   useEffect(() => {
     setPage(1);
     setProducts([]);
     setHasMore(true);
-  }, [search, selectedOption]);
+  }, [searchQuery, selectedOption]);
 
+  // Append or replace products
   useEffect(() => {
     if (data?.products) {
-      setProducts((prevProducts) =>
-        page === 1 ? data.products : [...prevProducts, ...data.products]
+      setProducts(prev =>
+        page === 1 ? data.products : [...prev, ...data.products]
       );
       if (page >= data.totalPages) {
         setHasMore(false);
@@ -92,94 +101,98 @@ const HomeScreen = () => {
   const loadMoreProducts = () => {
     if (!isFetching && hasMore) {
       setIsFetching(true);
-      setPage((prevPage) => prevPage + 1);
+      setPage(prev => prev + 1);
     }
   };
 
   const handleClearFilter = () => {
-    setSearch("");
+    setSearchInput("");
+    setSearchQuery("");
     setSelectedOption("");
+    filterListRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
-  const renderHeader = () => (
-    <View>
-      <CustomBanner />
-      {/* Search Bar */}
-      <View style={{ flexDirection: "row" }}>
-        <View style={styles.searchContainer}>
-          <FontAwesome
-            name="search"
-            size={20}
-            color="#002140"
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search Plant"
-            placeholderTextColor="#002140"
-            onChangeText={setSearch}
-            value={search}
-          />
-        </View>
-        <TouchableOpacity onPress={handleClearFilter}>
-          <Image
-            source={require("@/assets/images/filterIcon.png")}
-            style={styles.filterIcon}
-          />
-        </TouchableOpacity>
-      </View>
-      {/* Category Filter */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterContainer}
-      >
-        {options.map((option, key) => (
-          <TouchableOpacity
-            key={key}
-            style={[
-              styles.filterButton,
-              selectedOption === option && styles.activeFilterButton,
-            ]}
-            onPress={() => setSelectedOption(option)}
-          >
-            <Text
-              style={[
-                styles.filterText,
-                selectedOption === option && styles.activeFilterText,
-              ]}
-            >
-              {option}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </View>
-  );
+  const onSelectOption = (option, index) => {
+    setSelectedOption(option);
+    filterListRef.current?.scrollToIndex({ index, animated: true });
+  };
 
   return (
     <View style={styles.container}>
+      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
       <CustomHeader />
+
+      {/* HEADER: Banner, Search, Filters */}
+      <View style={styles.headerContainer} keyboardShouldPersistTaps="handled">
+        {/* <CustomBanner /> */}
+
+        <View style={styles.searchRow}>
+          <View style={styles.searchContainer}>
+            <FontAwesome name="search" size={20} color="#002140" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search Plant"
+              placeholderTextColor="#002140"
+              value={searchInput}
+              onChangeText={setSearchInput}
+            />
+          </View>
+          <TouchableOpacity onPress={handleClearFilter}  style={[
+                styles.filterIcon,
+                selectedOption && { backgroundColor: "#0D986A" }
+              ]}>
+            {/* <Image
+              source={require("@/assets/images/filterIcon.png")}
+              style={[
+                styles.filterIcon,
+                selectedOption && { backgroundColor: "#0D986A" }
+              ]}
+            /> */}
+              <FontAwesome name="filter" size={25} color={"#002144"}/>
+
+            
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          ref={filterListRef}
+          horizontal
+          data={options}
+          keyExtractor={item => item}
+          showsHorizontalScrollIndicator={false}
+          getItemLayout={(_, idx) => ({ length: OPTION_WIDTH, offset: OPTION_WIDTH * idx, index: idx })}
+          renderItem={({ item, index }) => (
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                selectedOption === item && styles.activeFilterButton,
+              ]}
+              onPress={() => onSelectOption(item, index)}
+            >
+              <Text
+                style={[
+                  styles.filterText,
+                  selectedOption === item && styles.activeFilterText,
+                ]}
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+
+      {/* PRODUCT LIST */}
       {isLoading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="black" />
-          <Text
-            style={{
-              fontSize: 18,
-              marginTop: 5,
-              fontWeight: 600,
-              color: "#002140",
-              marginLeft: 15,
-            }}
-          >
-            Loading...
-          </Text>
+          <Text style={styles.loadingText}>Loading...</Text>
         </View>
       )}
+     
       <FlatList
-        key={selectedOption}
         data={products}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={item => item.id.toString()}
         renderItem={({ item, index }) => (
           <ProductCard
             id={item.id}
@@ -191,9 +204,7 @@ const HomeScreen = () => {
             bgColor={colors[index % colors.length]}
           />
         )}
-        onMomentumScrollBegin={() => {
-          onEndReachedCalledDuringMomentum.current = false;
-        }}
+        onMomentumScrollBegin={() => { onEndReachedCalledDuringMomentum.current = false; }}
         onEndReached={() => {
           if (!onEndReachedCalledDuringMomentum.current) {
             loadMoreProducts();
@@ -201,138 +212,77 @@ const HomeScreen = () => {
           }
         }}
         onEndReachedThreshold={0.5}
+        showsVerticalScrollIndicator={false}
         ListFooterComponent={() => {
           if (isFetching) {
             return (
-              <View style={{  flexDirection:"row" ,alignSelf:"center" ,justifyContent:"center" }}>
-                <ActivityIndicator
-                  size="small"
-                  color="#000"
-                  style={{ marginTop: 10 }}
-                />
-                <Text
-                  style={{
-                    fontSize: 16,
-                    marginTop: 8,
-                    fontWeight: 600,
-                    color: "#002140",
-                    marginLeft: 5,
-                  }}
-                >
-                  loading more...
-                </Text>
+              <View style={styles.footerLoading}>
+                <ActivityIndicator size="small" />
+                <Text style={styles.footerLoadingText}>loading more...</Text>
               </View>
             );
           }
-          if (!hasMore && products.length > 0) {
-            return (
-              <Text style={{ textAlign: "center", padding: 5 }}>
-                No more products
-              </Text>
-            );
-          }
-          if (isLoading) {
-            return (
-              <View
-                style={{
-                  justifyContent: "center",
-                  alignSelf: "center",
-                  height: "100%",
-                }}
-              >
-                <ActivityIndicator size="large" color="black" />
-              </View>
-            );
+          if (!hasMore && products.length) {
+            return <Text style={styles.noMore}>No more products</Text>;
           }
           return null;
         }}
-        // ListEmptyComponent={() => {
-        //   if (isFetching || isLoading) {
-        //     return (
-        //       <View
-        //         style={{
-        //           justifyContent: "center",
-        //           alignSelf: "center",
-        //           height: "100%",
-        //         }}
-        //       >
-        //         <ActivityIndicator size="small" color="black" />
-        //       </View>
-        //     );
-        //   }
-        // }}
-        ListHeaderComponent={renderHeader}
-        showsVerticalScrollIndicator={false}
       />
     </View>
   );
 };
 
-export default HomeScreen;
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  loadingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1,
-    marginTop: "40%",
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
+  headerContainer: { paddingHorizontal: 10 , paddingRight:15 , marginBottom:5},
+  searchRow: { flexDirection: "row", alignItems: "center", marginTop:2 ,marginBottom:10 },
   searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#002140",
-    borderRadius: 14,
-    marginHorizontal: 10,
-    marginTop: 10,
-    paddingHorizontal: 10,
-    height: 55,
-    width: "80%",
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
     flex: 1,
-    fontSize: 16,
-  },
-  filterIcon: {
-    marginTop: 10,
-    height: 55,
-    width: 50,
-  },
-  filterContainer: {
     flexDirection: "row",
-    marginTop: 10,
-    marginHorizontal: 15,
+    backgroundColor: "#F0F0F0",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    alignItems: "center",
+    height: 55,
+  },
+  searchIcon: { marginRight: 8 },
+  searchInput: { flex: 1, height: 40, fontSize: 16, color: "#002140" },
+  filterIcon: {
+    width: 55,
+    height: 55,
+    marginLeft: 10,
+    tintColor: "#002140",
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent:"center",
+    backgroundColor: "#E0E0E0",
   },
   filterButton: {
+    width: OPTION_WIDTH,
     paddingVertical: 8,
-    paddingHorizontal: 15,
+    marginRight: 8,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#002140",
-    marginLeft: 7,
+    backgroundColor: "#F0F0F0",
+    alignItems: "center",
   },
-  activeFilterButton: {
-    backgroundColor: "#0D986A",
-    borderColor: "#0D986A",
+  activeFilterButton: { backgroundColor: "#0D986A" },
+  filterText: { color: "#002140", fontSize: 14 },
+  activeFilterText: { color: "#fff", fontWeight: "bold" },
+  loadingOverlay: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -50 }, { translateY: -50 }],
+    alignItems: "center",
   },
-  filterText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#002140",
+  loadingText: { fontSize: 18, marginTop: 8, color: "#002140" },
+  footerLoading: {
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingVertical: 10,
   },
-  activeFilterText: {
-    color: "white", // Active text color
-  },
+  footerLoadingText: { marginLeft: 8, fontSize: 16, color: "#002140" },
+  noMore: { textAlign: "center", padding: 10, color: "#888" },
 });
+
+export default HomeScreen;

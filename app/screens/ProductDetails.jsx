@@ -416,7 +416,7 @@ const ProductDetails = ({ route }) => {
               Similar Plant
             </Text>
 
-            <View style={{ padding: 10 }}>
+            <View style={{ padding: 10  }}>
               <CustomSimilarProductList products={similarProduct?.data}/>
             </View>
           </ScrollView>

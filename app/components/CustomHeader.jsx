@@ -9,7 +9,6 @@ const CustomHeader = ({color="white"}) => {
   return (
     <View style={[styles.container , {backgroundColor:color}]}>
       <View style={{flexDirection:"row" , marginLeft:5}}>
-
       <Image
         source={require("@/assets/images/favicon.png")}
         style={styles.logo}
